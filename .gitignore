@@ -1,0 +1,14 @@
+# Cartelle generate automaticamente
+build/
+dist/
+.idea/
+.vscode/
+*.log
+
+# Escludi le cartelle di build Flutter e Java
+/frontend/build/
+/backend/target/
+
+# Escludi file temporanei di design
+/design/*.tmp
+
