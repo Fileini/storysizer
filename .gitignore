@@ -4,6 +4,7 @@ dist/
 .idea/
 .vscode/
 *.log
+.DS_Store
 
 # Escludi le cartelle di build Flutter e Java
 /frontend/build/
