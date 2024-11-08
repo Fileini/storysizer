@@ -8,6 +8,7 @@ dist/
 
 # Escludi le cartelle di build Flutter e Java
 /frontend/build/
+/frontend/flutter
 /backend/target/
 
 # Escludi file temporanei di design
