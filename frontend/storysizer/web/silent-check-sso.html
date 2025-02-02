@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>silent-check-sso</title>
+</head>
+<body>
+  <script>
+    // Lo script invia un postMessage al parent window
+    // comunicando l'URL, in modo che il JS adapter di Keycloak
+    // possa capire se esiste già una sessione valida.
+    parent.postMessage(location.href, location.origin);
+  </script>
+</body>
+</html>
