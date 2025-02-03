@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:storysizer/screens/mysizings.dart';
@@ -59,8 +60,8 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawerScrimColor: Colors.transparent,
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         // L’hamburger menu viene aggiunto in automatico quando usiamo la proprietà 'drawer'
         automaticallyImplyLeading: true,
         centerTitle: false,
@@ -90,11 +91,11 @@ class _MenuScreenState extends State<MenuScreen> {
             future: AuthService.instance.getUserProfile(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.only(right: 16.0),
+                return Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 );
@@ -109,12 +110,13 @@ class _MenuScreenState extends State<MenuScreen> {
                     onPressed: () {
                       context.go('/home/profile');
                     },
-                    backgroundColor: Colors.grey[300],
+                    shadowColor: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    avatar:
-                        const Icon(Icons.person_2_rounded, color: Colors.black),
+                    avatar: Icon(Icons.person_2_rounded,
+                        color: Theme.of(context).colorScheme.tertiary),
                     label: Text(
                       snapshot.data!['firstName']!,
                       maxLines: 2, // 🔥 Permettiamo massimo 2 righe
@@ -131,46 +133,59 @@ class _MenuScreenState extends State<MenuScreen> {
           ),
         ],
       ),
-      drawer: Drawer(
-        width: 250,
-        backgroundColor: Colors.transparent,
-        elevation: 2,
-        child: ListView(
-          padding: const EdgeInsets.only(left: 16.0),
-          // Rimuovi eventuali padding default se preferisci con: padding: EdgeInsets.zero,
-          children: [
-            const SizedBox(height: 50),
-            ListTile(
-              tileColor: Colors.amber,
-              leading: const Icon(
-                Icons.flash_on,
-                color: Colors.black,
-              ),
-              title: const Text("Quick Size"),
-              onTap: () => _onItemTapped(0),
-              visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
+      drawer: GestureDetector(onTap: Navigator.of(context).pop,
+        child: Drawer(
+          width: 300,
+          backgroundColor: Colors.transparent,
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(38.0),
+            child: ListView(
+              children: [
+                SizedBox(height: 30,),
+                Card(elevation: 5,shadowColor: Theme.of(context).primaryColor,shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(
+                       CupertinoIcons.bolt_circle_fill,
+                    ),
+                    title: const Text("Quick Size"),
+                    onTap: () => _onItemTapped(0),
+                    visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
+                  ),
+                ),
+                Card(elevation: 5,shadowColor: Theme.of(context).primaryColor,shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                  ),
+                  child: ListTile(
+                    style: Theme.of(context).listTileTheme.style,
+                    leading: const Icon(
+                      CupertinoIcons.doc_plaintext,
+                    ),
+                    title: const Text("History"),
+                    onTap: () => _onItemTapped(1),
+                    visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
+                  ),
+                ),
+                Card(elevation: 5,shadowColor: Theme.of(context).primaryColor,shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(
+                      CupertinoIcons.group_solid,
+                    ),
+                    title: const Text("Groups"),
+                    onTap: () => _onItemTapped(2),
+                    visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
+                  ),
+                )
+              ],
             ),
-            ListTile(
-              tileColor: Colors.amber,
-              leading: const Icon(
-                Icons.list_alt,
-                color: Colors.black,
-              ),
-              title: const Text("History"),
-              onTap: () => _onItemTapped(1),
-              visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
-            ),
-            ListTile(
-              tileColor: Colors.amber,
-              leading: const Icon(
-                Icons.group,
-                color: Colors.black,
-              ),
-              title: const Text("Groups"),
-              onTap: () => _onItemTapped(2),
-              visualDensity: const VisualDensity(horizontal: -2, vertical: -1),
-            )
-          ],
+          ),
         ),
       ),
       body: _buildBody(), // 🔥 Adesso mostra il contenuto corretto

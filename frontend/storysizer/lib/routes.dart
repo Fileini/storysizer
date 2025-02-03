@@ -18,6 +18,7 @@ class StszRoutes {
       final loggedIn = AuthService.instance.loginInfo.isLoggedIn;
       final isLoggingIn = state.matchedLocation == '/';
 
+      
       if (loggedIn == null) {
         return null; // 🔹 Non facciamo redirect se lo stato non è ancora determinato
       }
@@ -67,10 +68,14 @@ class StszRoutes {
             ),
           ),
           
+          
         ],
       ),
-    ],
-  );
+    ],errorBuilder: (context, state) {
+            print("🚨 ERRORE NEL ROUTING! URL: ${state.uri}");
+            return const ErrorScreen();
+          },
+  );   
 
   // Funzione per animare la transizione
 
@@ -87,4 +92,36 @@ Page<dynamic> _animatedPage({required GoRouterState state, required Widget child
       );
     },
   );
+}
+
+class ErrorScreen extends StatelessWidget {
+  const ErrorScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.yellow, // 🔥 Sfondo giallo per gli errori di routing
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, size: 80, color: Colors.red),
+            const SizedBox(height: 20),
+            Text(
+              "Oops! Qualcosa è andato storto...",
+              style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                GoRouter.of(context).go('/'); // Torna alla home
+              },
+              child: const Text("Torna alla schermata principale"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
