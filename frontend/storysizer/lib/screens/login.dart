@@ -1,11 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import '../services/auth_service.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
-
 class LoginScreen extends StatelessWidget {
-const LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +15,31 @@ const LoginScreen({super.key});
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Image.asset(
-              "assets/logo.png",
-              height: 150,
-              width: 150,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(75),
+              child: Stack(
+                children: [
+                  Image.asset(
+                    "assets/logo.png",
+                    height: 150,
+                    width: 150,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(75),
+                        border: Border.all(
+                          width: 5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Text("StorySizer",
+            Text(
+              "StorySizer",
               style: Theme.of(context).textTheme.displayLarge,
               textAlign: TextAlign.center,
             ),
@@ -41,13 +61,22 @@ class LoginButton extends StatelessWidget {
 
       return Center(
         child: loginInfo.isInitialized
-            ? SignInButton(
-                Buttons.google,
-                onPressed: () {
-                  AuthService.instance.login();
-                },
+            ? SizedBox(
+                width: 250,
+                height: 50,
+                child: SignInButton(
+                  Buttons.google,
+                  clipBehavior: Clip.hardEdge,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  onPressed: () {
+                    AuthService.instance.login();
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               )
-            : const CircularProgressIndicator(), // 🔥 Mostra la rotella di caricamento
+            : const CircularProgressIndicator(),
       );
     });
   }

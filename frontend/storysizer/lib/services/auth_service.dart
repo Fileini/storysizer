@@ -44,10 +44,7 @@ class AuthService {
   Future<void> init() async {
     
     keycloak.keycloakEventsStream.listen((event) async {
-      print("🔹 Evento Keycloak: ${event.type}");
-
       switch (event.type) {
-
         case KeycloakEventType.onReady:
             _LoginInfo.isInitialized = true;
 
