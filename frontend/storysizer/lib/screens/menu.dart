@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:storysizer/screens/mysizings.dart';
 import 'package:storysizer/screens/quick_sizer.dart';
 import 'package:storysizer/services/auth_service.dart';
@@ -7,7 +8,8 @@ import 'profile.dart';
 import 'groups.dart';
 
 class MenuScreen extends StatefulWidget {
-  const MenuScreen({super.key});
+  const MenuScreen({super.key, this.selectedTab = 0});
+  final int selectedTab;
 
   @override
   _MenuScreenState createState() => _MenuScreenState();
@@ -24,10 +26,33 @@ class _MenuScreenState extends State<MenuScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    Navigator.of(context).pop();
+    switch (index) {
+      case 0:
+        context.go('/home/quick-size');
+        break;
+      case 1:
+        context.go('/home/history');
+        break;
+      case 2:
+        context.go('/home/groups');
+        break;
+    }
+    Navigator.of(context).pop(); // Chiude il drawer dopo la navigazione
+  }
+
+  Widget _buildBody() {
+    switch (widget.selectedTab) {
+      case 0:
+        return QuickSizerView();
+      case 1:
+        return HistoryView();
+      case 2:
+        return GroupsView();
+      case 3:
+        return ProfileScreen();
+      default:
+        return QuickSizerView();
+    }
   }
 
   @override
@@ -81,26 +106,23 @@ class _MenuScreenState extends State<MenuScreen> {
                   padding: const EdgeInsets.only(right: 16.0),
                   child: Center(
                       child: ActionChip(
-                        onPressed: () {
-                          setState(() {
-                            _selectedIndex = 3;
-                                });
-                        },
+                    onPressed: () {
+                      context.go('/home/profile');
+                    },
                     backgroundColor: Colors.grey[300],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    avatar: const Icon(Icons.person_2_rounded, color: Colors.black),
+                    avatar:
+                        const Icon(Icons.person_2_rounded, color: Colors.black),
                     label: Text(
-                            snapshot.data!['firstName']!,
-                            maxLines: 2, // 🔥 Permettiamo massimo 2 righe
-                            softWrap:
-                                true, // 🔥 Permette la rottura delle righe
-                            overflow: TextOverflow
-                                .ellipsis, // 🔥 Se ancora troppo lungo, mette i puntini
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodySmall,
-                  
+                      snapshot.data!['firstName']!,
+                      maxLines: 2, // 🔥 Permettiamo massimo 2 righe
+                      softWrap: true, // 🔥 Permette la rottura delle righe
+                      overflow: TextOverflow
+                          .ellipsis, // 🔥 Se ancora troppo lungo, mette i puntini
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   )),
                 );
@@ -151,7 +173,7 @@ class _MenuScreenState extends State<MenuScreen> {
           ],
         ),
       ),
-      body: tabs[_selectedIndex],
+      body: _buildBody(), // 🔥 Adesso mostra il contenuto corretto
     );
   }
 }
