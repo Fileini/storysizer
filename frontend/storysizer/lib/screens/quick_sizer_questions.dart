@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'dart:ui';
-
-import 'package:storysizer/helpers/theme.dart';
 import 'package:storysizer/widgets/question.dart';
 
-class QuickSizerView extends StatefulWidget {
-  const QuickSizerView({super.key});
+class QuickSizerQuestionsView extends StatefulWidget {
+  final String name;
+
+  const QuickSizerQuestionsView({super.key,required this.name});
 
   @override
-  _QuickSizerViewState createState() => _QuickSizerViewState();
+  _QuickSizerQuestionsViewState createState() => _QuickSizerQuestionsViewState();
 }
 
-class _QuickSizerViewState extends State<QuickSizerView> {
+class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
   final List<String> questions = [
     "Reach",
     "Complexity",
@@ -54,24 +53,33 @@ class _QuickSizerViewState extends State<QuickSizerView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: List.generate(questions.length, (index) {
-              return QuestionWidget(
-                question: questions[index],
-                description: descriptions[index],
-                labels: labels[index],
-                icon: icons[index], // Passa l'icona al widget
-              );
-            }),
+    return Column(
+      children: [Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Center(child: Text('Sizing: '+ widget.name)),
+      ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List.generate(questions.length, (index) {
+                    return QuestionWidget(
+                      question: questions[index],
+                      description: descriptions[index],
+                      labels: labels[index],
+                      icon: icons[index], // Passa l'icona al widget
+                    );
+                  }),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
