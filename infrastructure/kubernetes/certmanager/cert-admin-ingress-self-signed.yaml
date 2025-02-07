@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-admin-cert
+  namespace: auth
+spec:
+  secretName: wildcard-admin-cluster-tls
+  commonName: "*.admin.cluster.local.com"
+  duration: 8760h 
+  renewBefore: 720h 
+  issuerRef:
+    name: selfsigned-clusterissuer
+    kind: ClusterIssuer
+  commonName: keycloak.admin.cluster.local.com
+  dnsNames:
+    - "*.admin.cluster.local.com"
+    - "admin.cluster.local.com"

@@ -1,0 +1,1 @@
+helm install keycloak codecentric/keycloak   --namespace auth     -f helm-values.yaml

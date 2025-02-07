@@ -1,0 +1,10 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-block-public
+  namespace: auth
+spec:
+  redirectRegex:
+    regex: "^.*/admin.*"
+    replacement: "/"
+    permanent: true

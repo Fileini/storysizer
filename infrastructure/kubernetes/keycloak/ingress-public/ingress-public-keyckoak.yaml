@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-public
+  namespace: auth
+  annotations:
+    kubernetes.io/ingress.class: traefik-public
+    meta.helm.sh/release-name: keycloak
+    meta.helm.sh/release-namespace: auth
+    app.kubernetes.io/component: keycloak
+    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/version: 26.1.0
+    helm.sh/chart: keycloak-24.4.8
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure-pub
+
+spec:
+  ingressClassName: traefik-public
+  rules:
+  - host: keycloak.public.cluster.local.com
+    http:
+      paths:
+        - path: /admin
+          pathType: Prefix
+          backend:
+            service:
+              name: non-existent-service  # Un servizio fittizio per forzare l'errore 404
+              port:
+                number: 80
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak-http
+              port:
+                name: http
+
+  tls:
+  - hosts:
+    - keycloak.public.cluster.local.com
+    secretName: wildcard-public-cluster-tls

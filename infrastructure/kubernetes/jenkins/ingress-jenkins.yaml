@@ -4,10 +4,10 @@ metadata:
   name: jenkins-ingress
   namespace: jenkins
   annotations:
-    kubernetes.io/ingress.class: traefik
 spec:
+  ingressClassName: traefik-admin
   rules:
-  - host: jenkins.cluster.local
+  - host: jenkins.admin.cluster.local.com
     http:
       paths:
       - path: /
@@ -17,8 +17,3 @@ spec:
             name: jenkins
             port:
               number: 8080
-
-#tls:
-  # - hosts:
-  #   - jenkins.cluster.local
-  #   secretName: jenkins-tls
