@@ -10,5 +10,5 @@ subjects:
   namespace: jenkins
 roleRef:
   kind: Role
-  name: jenkins-kubectl-role
+  name: jenkins-deployer-frontend-dev-role
   apiGroup: rbac.authorization.k8s.io

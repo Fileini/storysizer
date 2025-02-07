@@ -1,109 +1,93 @@
-from diagrams import Diagram, Cluster
-from diagrams.k8s.compute import Deployment, StatefulSet, Pod
+from diagrams import Diagram, Cluster, Edge
+from diagrams.k8s.compute import Pod, Deployment, StatefulSet
 from diagrams.k8s.network import Ingress, Service
 from diagrams.k8s.storage import PVC
-from diagrams.k8s.podconfig import ConfigMap, Secret
-from diagrams.onprem.client import Users
+from diagrams.k8s.compute import Pod as ConfigMap
+from diagrams.onprem.database import PostgreSQL
+from diagrams.onprem.client import User
+from diagrams.onprem.network import Internet
+from diagrams.generic.network import Router
+from diagrams.custom import Custom
 
-with Diagram("Kubernetes Infrastructure", show=True, filename="k8s_infra_diagram", direction="LR"):
-    # Nodo che rappresenta il Developer (accesso diretto a Flutter DevEnv)
-    developer = Users("Developer")
-    # Nodo per gli utenti esterni (es. utenti finali)
-    external_users = Users("External Users")
-
-    with Cluster("Kubernetes Cluster"):
-        # Ingress Controller (Namespace: kube-system)
-        with Cluster("Namespace: kube-system"):
-            ingress_controller = Ingress("Traefik Ingress\nIP: 192.168.1.30")
+with Diagram("Web Self-Hosted Infrastructure", show=False):
+    internet = Internet("Internet")
+    developer = User("Developer")
+    
+    with Cluster("K3s Cluster - Master Node"):
         
-        # MetalLB (Namespace: metallb-system)
-        with Cluster("Namespace: metallb-system"):
-            metallb_controller = Pod("MetalLB Controller")
-            metallb_speaker = Pod("MetalLB Speaker")
-            metallb_webhook = Service("MetalLB Webhook Service")
+        with Cluster("Namespace: metallb"):
+            metallb = Custom("MetalLB", "./metallb_logo.png")
 
-        # Namespace: auth - Keycloak e il suo database Postgres
+        with Cluster("Namespace: ingress"):
+            traefik_public = Service("Traefik-Public\n192.168.1.31")
+            traefik_admin = Service("Traefik-Admin\n192.168.1.30")
+
+            dashboard_public = Ingress("Traefik Public Dashboard")
+            dashboard_admin = Ingress("Traefik Admin Dashboard")
+
+            traefik_public >> dashboard_public
+            traefik_admin >> dashboard_admin
+
         with Cluster("Namespace: auth"):
-            with Cluster("Keycloak"):
-                keycloak_stateful = StatefulSet("Keycloak")
-                keycloak_db = StatefulSet("Keycloak Postgres")
-                keycloak_db_pvc = PVC("Keycloak DB PVC")
-            keycloak_service = Service("Keycloak Service\n(ClusterIP)")
-            keycloak_ingress = Ingress("Keycloak Ingress\nkeycloak.cluster.local")
-            keycloak_secret = Secret("Keycloak Secret")
+            keycloak = StatefulSet("Keycloak")
+            keycloak_db = StatefulSet("Keycloak-Postgres")
+            keycloak_pvc = PVC("Keycloak DB PVC")
 
-        # Namespace: frontend-dev
+            svc_keycloak = Service("Keycloak Service\nClusterIP")
+            svc_keycloak_headless = Service("Keycloak Headless\nClusterIP")
+            svc_keycloak_postgresql = Service("Keycloak-PostgreSQL\nClusterIP")
+
+            ingress_admin = Ingress("keycloak.admin.cluster.local.com")
+            ingress_public = Ingress("keycloak.public.cluster.local.com")
+
+            keycloak >> svc_keycloak >> ingress_admin
+            keycloak >> ingress_public
+            keycloak_db >> keycloak_pvc
+
         with Cluster("Namespace: frontend-dev"):
-            # Flutter Development Environment esposto come LoadBalancer
-            flutter_deployment = Deployment("Flutter DevEnv Deployment")
-            flutter_pod = Pod("Flutter DevEnv Pod")
-            flutter_lb_service = Service("Flutter DevEnv LB\nLoadBalancer\nIP: 192.168.1.36\nPort: 22")
-            # Catena: Service (LoadBalancer) -> Pod -> Deployment
-            flutter_lb_service >> flutter_pod >> flutter_deployment
+            flutter_devenv = Deployment("Flutter-DevEnv")
+            pod_flutter = Pod("Pod Flutter-DevEnv")
+            svc_flutter = Service("Flutter Service\n192.168.1.36:22")
 
-            # Storysizer-web: applicazione web con Service ClusterIP e Ingress
-            storysizer_deployment = Deployment("Storysizer-web Deployment")
-            storysizer_pod = Pod("Storysizer-web Pod")
-            storysizer_service = Service("Storysizer-web Service\n(ClusterIP)")
-            storysizer_ingress = Ingress("Storysizer Ingress\nstorysizer.cluster.local")
-            # Catena: Ingress -> Service -> Pod -> Deployment
-            storysizer_ingress >> storysizer_service >> storysizer_pod >> storysizer_deployment
+            storysizer_web = Deployment("StorySizer-Web")
+            pod_storysizer = Pod("Pod StorySizer-Web")
+            svc_storysizer = Service("StorySizer Service\nClusterIP: HTTPS")
+            ingress_storysizer = Ingress("storysizer.admin.cluster.local.com")
 
-        # Namespace: service-dev (Microservizi Spring Boot)
+            flutter_devenv >> pod_flutter >> svc_flutter
+            storysizer_web >> pod_storysizer >> svc_storysizer >> ingress_storysizer
+
         with Cluster("Namespace: service-dev"):
-            # Microservizio "story"
-            with Cluster("Story Service"):
-                story_deployment = Deployment("Deployment: Story")
-                story_pod = Pod("Pod: Story")
-                story_config = ConfigMap("ConfigMap: Story")
-                story_service = Service("Service: Story\n(ClusterIP)")
-                story_ingress = Ingress("Ingress: api.cluster.local/story")
-                # Catena: Ingress -> Service -> Pod -> Deployment
-                story_ingress >> story_service >> story_pod >> story_deployment
+            microservice_story = Deployment("Microservice Story")
+            pod_story = Pod("Pod Story")
+            config_story = ConfigMap("ConfigMap Story")
+            ingress_story = Ingress("api.cluster.local/story")
 
-            # Microservizio "estimation"
-            with Cluster("Estimation Service"):
-                estimation_deployment = Deployment("Deployment: Estimation")
-                estimation_pod = Pod("Pod: Estimation")
-                estimation_config = ConfigMap("ConfigMap: Estimation")
-                estimation_service = Service("Service: Estimation\n(ClusterIP)")
-                estimation_ingress = Ingress("Ingress: api.cluster.local/estimation")
-                # Catena: Ingress -> Service -> Pod -> Deployment
-                estimation_ingress >> estimation_service >> estimation_pod >> estimation_deployment
+            microservice_estimation = Deployment("Microservice Estimation")
+            pod_estimation = Pod("Pod Estimation")
+            config_estimation = ConfigMap("ConfigMap Estimation")
+            ingress_estimation = Ingress("api.public.cluster.local/estimation")
 
-            # Database Postgres condiviso per i microservizi (story ed estimation)
-            with Cluster("Shared Postgres DB"):
-                shared_db = Pod("Postgres DB\n(storysizer)")
-                shared_db_pvc = PVC("DB PVC")
-                shared_db >> shared_db_pvc
+            postgres_storysizer = PostgreSQL("Postgres StorySizer")
+            pvc_postgres = PVC("StorySizer DB PVC")
 
-            # I Pod dei microservizi si collegano al DB (per la persistenza)
-            story_pod >> shared_db
-            estimation_pod >> shared_db
+            microservice_story >> config_story >> ingress_story
+            microservice_estimation >> config_estimation >> ingress_estimation
+            microservice_story >> postgres_storysizer
+            microservice_estimation >> postgres_storysizer
+            postgres_storysizer >> pvc_postgres
 
-            # I Pod dei microservizi si collegano al Keycloak Service per l'autenticazione
-            story_pod >> keycloak_service
-            estimation_pod >> keycloak_service
-
-        # Namespace: jenkins
         with Cluster("Namespace: jenkins"):
-            jenkins_deployment = Deployment("Jenkins Deployment")
-            jenkins_pod = Pod("Jenkins Pod")
-            jenkins_service = Service("Jenkins Service\n(ClusterIP)")
-            jenkins_ingress = Ingress("Jenkins Ingress\njenkins.cluster.local")
-            # Catena: Ingress -> Service -> Pod -> Deployment
-            jenkins_ingress >> jenkins_service >> jenkins_pod >> jenkins_deployment
+            jenkins = Deployment("Jenkins")
+            pod_jenkins = Pod("Pod Jenkins")
+            svc_jenkins = Service("Jenkins Service\nClusterIP: HTTPS")
+            ingress_jenkins = Ingress("jenkins.cluster.local")
 
-    # Collegamenti globali dal Ingress Controller alle varie Ingress
-    ingress_controller >> keycloak_ingress
-    ingress_controller >> storysizer_ingress
-    ingress_controller >> story_ingress  # per Story Service
-    ingress_controller >> estimation_ingress  # per Estimation Service
-    ingress_controller >> jenkins_ingress
+            jenkins >> pod_jenkins >> svc_jenkins >> ingress_jenkins
 
-    # Il Developer si collega direttamente al servizio LoadBalancer di Flutter DevEnv
-    developer >> flutter_lb_service
-
-    # Gli utenti esterni si collegano al Traefik Ingress Controller
-    external_users >> ingress_controller
-
+    developer >> Edge(label="SSH 192.168.1.36") >> svc_flutter
+    developer >> Edge(label="HTTPS") >> ingress_storysizer
+    developer >> Edge(label="API Requests") >> ingress_estimation
+    developer >> Edge(label="API Requests") >> ingress_story
+    internet >> traefik_public
+    internet >> traefik_admin
