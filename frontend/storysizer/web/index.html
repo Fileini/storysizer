@@ -30,16 +30,7 @@
 
   <title>storysizer</title>
   <link rel="manifest" href="manifest.json">
-  <script type="module">
-    // Import del default export dal file keycloak.js
-    import MyKeycloak from './js/keycloak.js';
-    // Oppure, se fosse un named export, useresti: 
-    // import { Keycloak as MyKeycloak } from './js/keycloak.js';
-
-    // Assegna la classe importata in window
-    window.Keycloak = MyKeycloak;
-    // Ora "window.Keycloak" è definito come la classe
-  </script>  
+  <script src="https://keycloak.public.cluster.local.com/auth/js/keycloak.js"></script>
 </head>
 <body>
   <script>
