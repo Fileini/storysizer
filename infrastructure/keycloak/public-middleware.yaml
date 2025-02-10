@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: block-admin-console
+  namespace: auth
+spec:
+  redirectRegex:
+    regex: "^/admin($|/.*)"
+    replacement: "/404"
+    permanent: true
