@@ -27,8 +27,8 @@ spec:
                 container('kubectl') {
                     script {
                         sh '''
-                            kubectl delete deployment storysizer-web -n frontend-dev --ignore-not-found=true
-                            kubectl delete service storysizer-web -n frontend-dev --ignore-not-found=true
+                            kubectl delete deployment storysizer-web -n frontend-prod --ignore-not-found=true
+                            kubectl delete service storysizer-web -n frontend-prod --ignore-not-found=true
                         '''
                     }
                 }
@@ -66,7 +66,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: storysizer-web
-  namespace: frontend-dev
+  namespace: frontend-prod
 spec:
   replicas: 1
   selector:
@@ -87,9 +87,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: storysizer-web
-  namespace: frontend-dev
+  namespace: frontend-prod
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 80
     targetPort: 80
@@ -97,6 +97,29 @@ spec:
     name: http
   selector:
     app: storysizer-web
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: storysizer-web-ingress
+  namespace: frontend-prod
+spec:
+  ingressClassName: traefik-public
+  rules:
+  - host: storysizer.public.cluster.local.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: storysizer-web
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - storysizer.public.cluster.local.com
+    secretName: wildcard-public-cluster-tls
 EOF
 
 kubectl apply -f deploy-storysizer.yaml

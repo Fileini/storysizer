@@ -114,7 +114,7 @@ EOF
                         ]) {
                             sh '''
                               echo $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
-                              echo '$DOCKERHUB_PASSWORD' | docker login -u '$DOCKERHUB_USERNAME' --password-stdin $DOCKER_REGISTRY_URL
+                              echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin $DOCKER_REGISTRY_URL
                               cd docker-context
                               docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
                               docker push $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
