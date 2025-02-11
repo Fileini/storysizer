@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show ChangeNotifier, immutable;
+import 'package:flutter/foundation.dart' show ChangeNotifier, ValueNotifier, immutable;
 import 'package:keycloak_flutter/keycloak_flutter.dart';
 
 class LoginInfo extends ChangeNotifier {
@@ -25,10 +25,10 @@ set isInitialized(bool value) {
 class AuthService {
   static final AuthService instance = AuthService._internal();
   static KeycloakProfile? _keycloakProfile;
-bool _refreshingToken = false;
   final int _maxRefreshAttempts = 5; // soglia per forzare il logout
+  final ValueNotifier<TokenRefreshState> tokenRefreshState =
+      ValueNotifier(const TokenRefreshState());
 
-  int _refreshFailureCount = 0;
     factory AuthService() {
     return instance;
   }
@@ -108,7 +108,10 @@ Future<void> handleEvent(KeycloakEvent event) async {
     _keycloakProfile = await keycloak.loadUserProfile();
     _LoginInfo.isLoggedIn = true;
     // Resetta il contatore di errori al login avvenuto con successo.
-    _refreshFailureCount = 0;
+    tokenRefreshState.value = tokenRefreshState.value.copyWith(
+      isRefreshing: false,
+      failureCount: 0,
+    );
   }
 
   void _handleAuthLogout() {
@@ -117,29 +120,31 @@ Future<void> handleEvent(KeycloakEvent event) async {
   }
 
   void _handleTokenExpired() {
-    if (!_refreshingToken) {
-      _refreshingToken = true;
+    if (!tokenRefreshState.value.isRefreshing) {
+      tokenRefreshState.value =
+          tokenRefreshState.value.copyWith(isRefreshing: true);
+      keycloak.updateToken();
       keycloak.updateToken();
     }
   }
 
   void _handleAuthRefreshSuccess() {
-    _refreshingToken = false;
-    // Resetta il contatore al successo
-    _refreshFailureCount = 0;
+    tokenRefreshState.value = tokenRefreshState.value.copyWith(
+      isRefreshing: false,
+      failureCount: 0,
+    );
   }
 
   Future<void> _handleAuthRefreshError() async {
-    _refreshingToken = false;
-    _refreshFailureCount++;
-    if (_refreshFailureCount >= _maxRefreshAttempts) {
-      // Se il refresh fallisce ripetutamente, forziamo il logout
+    final newFailureCount = tokenRefreshState.value.failureCount + 1;
+    tokenRefreshState.value =
+        tokenRefreshState.value.copyWith(isRefreshing: false, failureCount: newFailureCount);
+    if (newFailureCount >= _maxRefreshAttempts) {
       _forceLogout();
     } else {
       await keycloak.updateToken();
     }
   }
-
   void _forceLogout() {
     // Pulizia dello stato e logout forzato
     logout();
@@ -189,5 +194,24 @@ Future<void> handleEvent(KeycloakEvent event) async {
   }
 }
 
+@immutable
+class TokenRefreshState {
+  final bool isRefreshing;
+  final int failureCount;
 
+  const TokenRefreshState({
+    this.isRefreshing = false,
+    this.failureCount = 0,
+  });
+
+  TokenRefreshState copyWith({
+    bool? isRefreshing,
+    int? failureCount,
+  }) {
+    return TokenRefreshState(
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      failureCount: failureCount ?? this.failureCount,
+    );
+  }
+}
 
