@@ -1,0 +1,1 @@
+helm upgrade --install traefik-public traefik/traefik -n ingress -f helm-values.yaml 

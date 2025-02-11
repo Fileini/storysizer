@@ -1,0 +1,29 @@
+extraEnv: |
+   - name: PROXY_ADDRESS_FORWARDING
+     value: "true"     
+   - name: KC_HTTP_ENABLED
+     value: "true"
+   - name: KC_PROXY_HEADERS
+     value: "xForwarded"            
+   - name: KC_HOSTNAME
+     value: "keycloak.admin.cluster.local.com"
+   - name: KC_HOSTNAME_STRICT_HTTPS
+     value: "true"
+   - name: KC_PROXY
+     value: "edge"
+   - name: KC_HOSTNAME_STRICT
+     value: "false"
+   - name: KEYCLOAK_USER_FILE               
+     value: /secrets/keycloak-creds/user
+   - name: KEYCLOAK_PASSWORD_FILE      
+     value: /secrets/keycloak-creds/password
+   - name: KC_URLS_FRONTEND
+     value: "https://keycloak.admin.cluster.local.com/auth"
+extraVolumeMounts: |
+   - name: keycloak-creds
+     mountPath: /secrets/keycloak-creds
+     readOnly: true
+extraVolumes: |
+   - name: keycloak-creds
+     secret:
+      secretName: keycloak-creds

@@ -1,0 +1,74 @@
+deployment:
+  kind: DaemonSet
+  labels:
+    app: traefik-public
+  podAnnotations: {}
+  podLabels:
+    app: traefik-public
+
+service:
+  enabled: true
+  type: LoadBalancer
+  spec:
+    loadBalancerIP: "192.168.1.31"
+  
+ingressClass: 
+  enabled: true
+  isDefaultClass: true
+  name: "traefik-public"
+
+providers:  
+  kubernetesCRD:
+    enabled: true
+    allowEmptyServices: false
+    ingressClass: "traefik-public"
+  kubernetesIngress:
+    ingressEndpoint:
+      publishedService: "ingress/traefik-public"
+    ingressClass: "traefik-public"
+
+ingressRoute:
+  dashboard:
+    enabled: false
+additionalArguments:
+- "--api=true"
+- "--api.insecure=true"
+
+extraObjects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: traefik-public-api
+    spec:
+      type: ClusterIP
+      selector:
+        app: traefik-public
+      ports:
+      - port: 8080
+        name: traefik
+        targetPort: 8080
+        protocol: TCP
+
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: traefik-public-dashboard
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    spec:
+      ingressClassName: traefik-admin
+      tls:
+      - hosts:
+        - traefikp.admin.cluster.local.com
+        secretName: wildcard-public-cluster-tls
+      rules:
+      - host: traefikp.admin.cluster.local.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-public-api
+                port:
+                  name: traefik

@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-public
+  namespace: auth
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: auth-block-admin-console@kubernetescrd
+    
+spec:
+  ingressClassName: traefik-public
+  rules:
+  - host: keycloak.public.cluster.local.com
+    http:
+      paths:
+        - path: /admin
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak-http
+              port:
+                name: http
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak-http
+              port:
+                name: http
+
+  tls:
+  - hosts:
+    - keycloak.public.cluster.local.com
+    secretName: wildcard-public-cluster-tls
