@@ -25,14 +25,17 @@ set isInitialized(bool value) {
 class AuthService {
   static final AuthService instance = AuthService._internal();
   static KeycloakProfile? _keycloakProfile;
+bool _refreshingToken = false;
+  final int _maxRefreshAttempts = 5; // soglia per forzare il logout
 
-  factory AuthService() {
+  int _refreshFailureCount = 0;
+    factory AuthService() {
     return instance;
   }
   final _LoginInfo = LoginInfo();
 
   static final keycloak = KeycloakService(KeycloakConfig(
-    url: 'http://keycloak.cluster.local.com',
+    url: 'https://keycloak.public.cluster.local.com',
     realm: 'storysizer',
     clientId: 'storysizer',
   ));
@@ -43,34 +46,7 @@ class AuthService {
 
   Future<void> init() async {
     
-    keycloak.keycloakEventsStream.listen((event) async {
-      switch (event.type) {
-        case KeycloakEventType.onReady:
-            _LoginInfo.isInitialized = true;
-
-        case KeycloakEventType.onAuthSuccess:
-          _keycloakProfile = await keycloak.loadUserProfile();
-          _LoginInfo.isLoggedIn = true;
-          break;
-
-        case KeycloakEventType.onAuthLogout:
-          _keycloakProfile = null;
-          _LoginInfo.isLoggedIn = false;
-          break;
-
-        case KeycloakEventType.onTokenExpired:
-          print("⚠️ Token scaduto. Tentativo di rinnovo...");
-          bool refreshed = await keycloak.updateToken();
-          if (!refreshed) {
-            print("Token non rinnovabile, eseguo logout.");
-            logout();
-          }
-          break;
-
-        default:
-          break;
-      }
-    });
+    keycloak.keycloakEventsStream.listen((event) async => handleEvent(event));
 
     await keycloak.init(
       initOptions: KeycloakInitOptions(
@@ -92,14 +68,87 @@ class AuthService {
   }
 
   Future<void> logout() async {
-              _LoginInfo.isLoggedIn = false;
-
     try {
       await keycloak.logout();
     } catch (e) {
       // log error
     }
   }
+
+Future<void> handleEvent(KeycloakEvent event) async {
+    switch (event.type) {
+      case KeycloakEventType.onReady:
+        _handleReady();
+        break;
+      case KeycloakEventType.onAuthSuccess:
+        await _handleAuthSuccess();
+        break;
+      case KeycloakEventType.onAuthLogout:
+        _handleAuthLogout();
+        break;
+      case KeycloakEventType.onTokenExpired:
+        _handleTokenExpired();
+        break;
+      case KeycloakEventType.onAuthRefreshSuccess:
+        _handleAuthRefreshSuccess();
+        break;
+      case KeycloakEventType.onAuthRefreshError:
+        await _handleAuthRefreshError();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleReady() {
+    _LoginInfo.isInitialized = true;
+  }
+
+  Future<void> _handleAuthSuccess() async {
+    _keycloakProfile = await keycloak.loadUserProfile();
+    _LoginInfo.isLoggedIn = true;
+    // Resetta il contatore di errori al login avvenuto con successo.
+    _refreshFailureCount = 0;
+  }
+
+  void _handleAuthLogout() {
+    _keycloakProfile = null;
+    _LoginInfo.isLoggedIn = false;
+  }
+
+  void _handleTokenExpired() {
+    if (!_refreshingToken) {
+      _refreshingToken = true;
+      keycloak.updateToken();
+    }
+  }
+
+  void _handleAuthRefreshSuccess() {
+    _refreshingToken = false;
+    // Resetta il contatore al successo
+    _refreshFailureCount = 0;
+  }
+
+  Future<void> _handleAuthRefreshError() async {
+    _refreshingToken = false;
+    _refreshFailureCount++;
+    if (_refreshFailureCount >= _maxRefreshAttempts) {
+      // Se il refresh fallisce ripetutamente, forziamo il logout
+      _forceLogout();
+    } else {
+      await keycloak.updateToken();
+    }
+  }
+
+  void _forceLogout() {
+    // Pulizia dello stato e logout forzato
+    logout();
+    _keycloakProfile = null;
+    _LoginInfo.isLoggedIn = false;
+  }
+
+
+
   /// -----------------------------------
   ///  8- getUserProfile
   /// -----------------------------------
@@ -138,5 +187,7 @@ class AuthService {
       };
     }
   }
-
 }
+
+
+
