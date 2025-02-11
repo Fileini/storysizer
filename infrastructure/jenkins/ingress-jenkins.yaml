@@ -17,3 +17,7 @@ spec:
             name: jenkins
             port:
               number: 8080
+  tls:
+  - hosts:
+    - jenkins.admin.cluster.local.com
+    secretName: wildcard-admin-cluster-tls
