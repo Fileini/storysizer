@@ -1,7 +1,7 @@
 package com.fileini.storysizer.service.estimation.controller;
 
 import com.fileini.storysizer.service.estimation.model.Estimation;
-import com.fileini.storysizer.service.estimation.EstimationRepository;
+import com.fileini.storysizer.service.estimation.repository.EstimationRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
