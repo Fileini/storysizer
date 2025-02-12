@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.fileini.storysizer</groupId>
-	<artifactId>estimations</artifactId>
+	<artifactId>estimation-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>estimations</name>
+	<name>estimation-service</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
