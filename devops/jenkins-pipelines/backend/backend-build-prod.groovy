@@ -81,7 +81,7 @@ spec:
                                 stage("Build ${service}") {
                                     dir("storysizer/backend/${service}") {
                                         sh """
-                                        mvn clean package -DskipTests
+                                        mvn clean package -DskipTests -B -T 1C
 
                                         if [ ! -f target/${service}-0.0.1-SNAPSHOT.jar ]; then
                                             echo "Error: JAR file not found for ${service}" >&2
