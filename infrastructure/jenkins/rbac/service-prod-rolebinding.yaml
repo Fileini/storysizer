@@ -2,13 +2,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: jenkins-kubectl-binding
-  namespace: service-dev
+  name: jenkins-kubectl-binding-service-prod
+  namespace: service-prod
 subjects:
 - kind: ServiceAccount
   name: jenkins
   namespace: jenkins
 roleRef:
   kind: Role
-  name: jenkins-deployer-service-dev-role
+  name: jenkins-deployer-service
   apiGroup: rbac.authorization.k8s.io
