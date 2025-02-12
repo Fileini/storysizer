@@ -1,13 +1,13 @@
-package com.storysizer.story_service;
+package com.fileini.storysizer.service.estimation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StoryServiceApplication {
+public class EstimationsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StoryServiceApplication.class, args);
+		SpringApplication.run(EstimationsApplication.class, args);
 	}
 
 }

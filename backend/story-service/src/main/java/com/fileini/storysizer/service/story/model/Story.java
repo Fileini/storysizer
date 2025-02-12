@@ -1,4 +1,4 @@
-package com.example.stories.model;
+package com.fileini.storysizer.service.story.model;
 
 import jakarta.persistence.*;
 

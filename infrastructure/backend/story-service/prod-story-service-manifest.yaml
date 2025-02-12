@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-service
+  namespace: service-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: story-service
+  template:
+    metadata:
+      labels:
+        app: story-service
+    spec:
+      containers:
+        - name: story-service
+          image: fileini/story-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: stories-db-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: story-service
+  namespace: service-prod
+spec:
+  selector:
+    app: story-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

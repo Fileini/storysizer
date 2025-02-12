@@ -1,35 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stories-service
-  namespace: backend-dev
+  name: estimation-service
+  namespace: service-prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: stories-service
+      app: estimation-service
   template:
     metadata:
       labels:
-        app: stories-service
+        app: estimation-service
     spec:
       containers:
-        - name: stories-service
-          image: stories-service:latest
+        - name: estimation-service
+          image: fileini/estimation-service:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
             - secretRef:
-                name: stories-db-secret
+                name: estimations-db-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: stories-service
-  namespace: backend-dev
+  name: estimation-service
+  namespace: service-prod
 spec:
   selector:
-    app: stories-service
+    app: estimation-service
   ports:
     - protocol: TCP
       port: 8080

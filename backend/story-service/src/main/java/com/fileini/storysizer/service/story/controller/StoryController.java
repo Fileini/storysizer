@@ -1,7 +1,7 @@
-package com.example.stories.controller;
+package com.fileini.storysizer.service.story.controller;
 
-import com.example.stories.model.Story;
-import com.example.stories.repository.StoryRepository;
+import com.fileini.storysizer.service.story.model.Story;
+import com.fileini.storysizer.service.story.repository.StoryRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
