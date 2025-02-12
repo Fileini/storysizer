@@ -1,0 +1,21 @@
+type Story @key(fields: "id") {
+    id: ID!
+    name: String!
+    owner: String!
+}
+
+type Estimation @key(fields: "id") {
+    id: ID!
+    owner: String!
+    complexity: Int!
+    reach: Story
+    storyId: ID!
+    dimensions: Int!
+    risk: Int!
+    interaction: Int!
+}
+
+extend type Query {
+    stories: [Story]
+    estimations: [Estimation]
+}
