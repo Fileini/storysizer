@@ -1,51 +1,75 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            // Configura il pod template con un container "docker" che ha il client Docker installato
+            label 'docker-agent'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: docker-agent
+spec:
+  containers:
+  - name: docker
+    image: docker:20.10.16
+    command:
+      - cat
+    tty: true
+    volumeMounts:
+      - name: docker-socket
+        mountPath: /var/run/docker.sock
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+"""
+        }
+    }
     tools {
         maven 'Maven'
     }
     environment {
-        // Assicurati di aver configurato in Jenkins le credenziali Docker con questo ID
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        // Specifica qui il nome dell’immagine Docker; nel nostro caso fileini/graphql-gateway
         DOCKER_IMAGE = "fileini/graphql-gateway:latest"
     }
-
     stages {
         stage('Checkout') {
             steps {
-                // Esegue il checkout della branch develop della repo fileini/storysizer
+                // Esegue il checkout della branch "develop" dal repository
                 git branch: 'develop', url: 'https://github.com/fileini/storysizer.git'
             }
         }
         stage('Build Maven Project') {
             steps {
-                // Usa la cartella corretta dove è presente il pom.xml
+                // Compila il progetto Maven (saltando i test, se desiderato)
                 dir('graphql-gateway') {
-                    sh 'mvn clean package -DskipTests -B -T 1C'
+                    sh 'mvn clean package -Dmaven.test.skip=true'
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
-                // Costruisce l’immagine Docker usando il Dockerfile presente nella cartella graphql-gateway
-                dir('graphql-gateway') {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
+                // Utilizza il container "docker" per eseguire i comandi Docker
+                container('docker') {
+                    dir('graphql-gateway') {
+                        sh "docker build -t ${DOCKER_IMAGE} ."
+                    }
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
-                // Esegue il push dell’immagine su Docker Hub utilizzando le credenziali configurate
-                withDockerRegistry([credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '']) {
-                    sh "docker push ${DOCKER_IMAGE}"
+                container('docker') {
+                    // Effettua il push dell'immagine su Docker Hub utilizzando le credenziali configurate in Jenkins
+                    withDockerRegistry([credentialsId: 'dockerhub-credentials', url: '']) {
+                        sh "docker push ${DOCKER_IMAGE}"
+                    }
                 }
             }
         }
     }
-
     post {
         always {
-            // Pulisce la workspace usando deleteDir() se cleanWs() non è disponibile
             deleteDir()
         }
     }
