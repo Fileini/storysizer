@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+  namespace: service-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+    spec:
+      containers:
+        - name: gateway-service
+          image: fileini/graphql-gateway:latest
+          ports:
+            - containerPort: 9090
+          env:
+            - name: KEYCLOAK_ISSUER_URI
+              value: "http://keycloak.auth.svc.cluster.local:80/realms/storysizer"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+  namespace: service-prod
+spec:
+  selector:
+    app: gateway-service
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
