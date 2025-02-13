@@ -17,8 +17,11 @@ graphql:
 server:
   port: 9090
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /v3/api-docs
+graphql:
+  graphiql:
+    enabled: true
+  playground:
+    enabled: true
+  servlet:
+    mapping: /graphql
+
