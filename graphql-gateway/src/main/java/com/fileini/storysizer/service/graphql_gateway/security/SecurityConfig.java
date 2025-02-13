@@ -11,13 +11,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/graphql").authenticated()
-                .anyRequest().permitAll()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+    http
+        .authorizeHttpRequests(auth -> auth
+            // Consenti l'accesso all'interfaccia GraphiQL e alle eventuali risorse statiche collegate
+            .requestMatchers("/graphiql/**", "/vendor/**", "/css/**", "/js/**").permitAll()
+            // Richiedi l'autenticazione per l'endpoint GraphQL
+            .requestMatchers("/graphql").authenticated()
+            // Per tutte le altre richieste, concedi l'accesso
+            .anyRequest().permitAll()
+        )
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt());
 
-        return http.build();
-    }
+    return http.build();
+}
+
+
 }
