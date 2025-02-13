@@ -16,6 +16,7 @@ spring:
     path: /graphql
     graphiql:
       enabled: true
+      path: /graphiql
   
 
 server:
