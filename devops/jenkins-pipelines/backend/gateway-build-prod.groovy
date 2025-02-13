@@ -43,7 +43,7 @@ spec:
             steps {
                 // Compila il progetto Maven (saltando i test, se desiderato)
                 dir('graphql-gateway') {
-                    sh 'mvn clean package -Dmaven.test.skip=true'
+                    sh 'mvn clean package -DskipTests -B -T 1C'
                 }
             }
         }
