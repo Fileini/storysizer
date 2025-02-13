@@ -6,7 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak.auth.svc.cluster.local:80/realms/storysizer
+          issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
 
   graphql:
     federation:
