@@ -16,6 +16,7 @@ spec:
       containers:
         - name: gateway-service
           image: fileini/graphql-gateway:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 9090
           env:
@@ -34,3 +35,28 @@ spec:
     - protocol: TCP
       port: 9090
       targetPort: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  namespace: service-prod
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik-public
+  rules:
+    - host: api.storysizer.public.cluster.local.com 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 9090
+  tls:
+    - hosts:
+      - storysizer.public.cluster.local.com
+      secretName: wildcard-public-cluster-tls
