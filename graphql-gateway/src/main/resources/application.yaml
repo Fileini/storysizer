@@ -13,15 +13,15 @@ graphql:
     services:
       stories: http://story-service.service-prod.svc.cluster.local:8080/graphql
       estimations: http://estimations-service.service-prod.svc.cluster.local:8081/graphql
+  path: /graphql
+    graphiql:
+      enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak.auth.svc.cluster.local:80/realms/myrealm
 
 server:
   port: 9090
-
-graphql:
-  graphiql:
-    enabled: true
-  playground:
-    enabled: true
-  servlet:
-    mapping: /graphql
 

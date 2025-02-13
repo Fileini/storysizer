@@ -30,17 +30,22 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-	
-    <dependency>
-    <groupId>com.graphql-java-kickstart</groupId>
-    <artifactId>graphql-spring-boot-starter</artifactId>
-    <version>12.0.0</version>
+		
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-graphql</artifactId>
 	</dependency>
 
 	<dependency>
-		<groupId>com.graphql-java-kickstart</groupId>
-		<artifactId>graphiql-spring-boot-starter</artifactId>
-		<version>12.0.0</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+
+	<!-- Dipendenza per GraphiQL Explorer -->
+	<dependency>
+		<groupId>org.springframework.graphql</groupId>
+		<artifactId>spring-graphql-test</artifactId>
+		<scope>test</scope>
 	</dependency>
 
 
@@ -48,12 +53,6 @@
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <!-- Spring Boot GraphQL -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-graphql</artifactId>
     </dependency>
 
     <!-- Spring Security per Keycloak -->
