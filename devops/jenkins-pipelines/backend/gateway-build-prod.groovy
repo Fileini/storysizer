@@ -1,25 +1,25 @@
 pipeline {
     agent any
     tools {
-            maven 'Maven'
-        }
+        maven 'Maven'
+    }
     environment {
-        // Tag dell'immagine su DockerHub
+        // Assicurati di aver configurato in Jenkins le credenziali Docker con questo ID
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        // Specifica qui il nome dell’immagine Docker; nel nostro caso fileini/graphql-gateway
         DOCKER_IMAGE = "fileini/graphql-gateway:latest"
-        // ID delle credenziali configurate in Jenkins per DockerHub
-        DOCKERHUB_CREDENTIALS = "dockerhub-credentials"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Clona il repository fileini/storysizer (assicurati di impostare il branch corretto se necessario)
-                git url: 'https://github.com/fileini/storysizer.git', branch: 'master'
+                // Esegue il checkout della branch develop della repo fileini/storysizer
+                git branch: 'develop', url: 'https://github.com/fileini/storysizer.git'
             }
         }
-        stage('Build con Maven') {
+        stage('Build Maven Project') {
             steps {
-                // Entra nella cartella del microservizio e compila il progetto saltando i test
+                // Usa la cartella corretta dove è presente il pom.xml
                 dir('graphql-gateway') {
                     sh 'mvn clean package -DskipTests -B -T 1C'
                 }
@@ -27,7 +27,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                // Costruisci l'immagine Docker utilizzando il Dockerfile presente nella root di graphql-gateway
+                // Costruisce l’immagine Docker usando il Dockerfile presente nella cartella graphql-gateway
                 dir('graphql-gateway') {
                     sh "docker build -t ${DOCKER_IMAGE} ."
                 }
@@ -35,13 +35,18 @@ pipeline {
         }
         stage('Push Docker Image') {
             steps {
-                // Accedi a DockerHub e push l'immagine
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        sh "docker push ${DOCKER_IMAGE}"
-                    }
+                // Esegue il push dell’immagine su Docker Hub utilizzando le credenziali configurate
+                withDockerRegistry([credentialsId: "${DOCKERHUB_CREDENTIALS}", url: '']) {
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Pulisce la workspace usando deleteDir() se cleanWs() non è disponibile
+            deleteDir()
         }
     }
 }
