@@ -19,6 +19,7 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/custom-login")
+                .defaultSuccessUrl("/graphiql", true)
                 .permitAll() // Assicurati che il login sia esente
             )
             .logout(logout -> logout.permitAll())
