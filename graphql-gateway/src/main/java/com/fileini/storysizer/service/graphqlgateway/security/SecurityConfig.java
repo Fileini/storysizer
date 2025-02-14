@@ -19,9 +19,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             // Abilita OAuth2 Login per il flusso SSO
-            .oauth2Login(oauth2 -> oauth2
-        .loginPage("/custom-login")
-    );
+            .oauth2Login(oauth2 -> oauth2.loginPage("/custom-login"));
             // Configura il resource server per gestire le richieste con token JWT
             .oauth2ResourceServer(oauth2 -> oauth2.jwt());
 
