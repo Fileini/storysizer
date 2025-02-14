@@ -4,6 +4,16 @@ spring:
 
   security:
     oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: storysizer
+            scope: openid,profile,email
+            authorization-grant-type: none
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: https://keycloak.public.cluster.local.com/auth/realms/storysizer
       resourceserver:
         jwt:
           issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
