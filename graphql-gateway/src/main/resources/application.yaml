@@ -13,7 +13,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            issuer-uri: https://keycloak.public.cluster.local.com/auth/realms/storysizer
+            issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
       resourceserver:
         jwt:
           issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
