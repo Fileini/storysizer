@@ -11,7 +11,7 @@ spring:
           keycloak:
             client-id: storysizer
             scope: openid,profile,email
-            authorization-grant-type: none
+            authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
