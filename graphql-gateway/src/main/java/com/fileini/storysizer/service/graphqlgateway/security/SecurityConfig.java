@@ -7,21 +7,24 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Consenti l'accesso all'interfaccia GraphiQL e alle eventuali risorse statiche
-                .requestMatchers("/login", "/custom-login", "/vendor/**", "/css/**", "/js/**").permitAll()
-                // Richiedi l'autenticazione per tutte le altre richieste
+                // Escludi dalla sicurezza la pagina di login e altri endpoint statici
+                .requestMatchers("/custom-login", "/error", "/css/**", "/js/**", "/vendor/**").permitAll()
                 .anyRequest().authenticated()
             )
-            // Abilita OAuth2 Login per il flusso SSO
-            .oauth2Login(oauth2 -> oauth2.loginPage("/custom-login"))
-            // Configura il resource server per gestire le richieste con token JWT
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/custom-login")
+                .permitAll() // Assicurati che il login sia esente
+            )
+            .logout(logout -> logout.permitAll())
+            // Disabilita CSRF solo se necessario (attenzione in produzione)
+            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }

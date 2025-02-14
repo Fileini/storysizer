@@ -1,4 +1,4 @@
-package com.fileini.storysizer.service.graphqlgateway.resolver;
+package com.fileini.storysizer.service.graphqlgateway.controller;
 
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
