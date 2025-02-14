@@ -35,5 +35,5 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
-    org.thymeleaf: DEBUG
+    org.thymeleaf: TRACE
 
