@@ -14,7 +14,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // Consenti l'accesso all'interfaccia GraphiQL e alle eventuali risorse statiche
-                .requestMatchers("/graphiql/**", "/vendor/**", "/css/**", "/js/**").permitAll()
+                .requestMatchers("/login", "/custom-login", "/vendor/**", "/css/**", "/js/**").permitAll()
                 // Richiedi l'autenticazione per tutte le altre richieste
                 .anyRequest().authenticated()
             )
