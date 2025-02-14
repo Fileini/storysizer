@@ -1,7 +1,9 @@
 spring:
   application:
     name: graphqlgateway
-
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
   security:
     oauth2:
       client:
