@@ -16,7 +16,7 @@ public class SecurityConfig {
             // Consenti l'accesso all'interfaccia GraphiQL e alle eventuali risorse statiche collegate
             .requestMatchers("/graphiql/**", "/vendor/**", "/css/**", "/js/**").permitAll()
             // Richiedi l'autenticazione per l'endpoint GraphQL
-            .requestMatchers("/graphql").authenticated()
+            .requestMatchers("/graphql").permitAll()
             // Per tutte le altre richieste, concedi l'accesso
             .anyRequest().permitAll()
         )
