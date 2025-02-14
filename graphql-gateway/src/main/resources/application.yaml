@@ -32,6 +32,8 @@ spring:
 server:
   port: 9090
   forward-headers-strategy: native
+  error:
+    include-stacktrace: always
 logging:
   level:
     org.springframework.security: DEBUG
