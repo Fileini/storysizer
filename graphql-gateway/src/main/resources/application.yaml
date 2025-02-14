@@ -34,8 +34,3 @@ server:
   forward-headers-strategy: native
   error:
     include-stacktrace: always
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.thymeleaf: TRACE
-
