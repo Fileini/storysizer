@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:storysizer/screens/groups.dart';
 import 'package:storysizer/screens/login.dart';
 import 'package:storysizer/screens/menu.dart';
-import 'package:storysizer/screens/mysizings.dart';
+import 'package:storysizer/screens/history.dart';
 import 'package:storysizer/screens/profile.dart';
 import 'package:storysizer/screens/quick_sizer_name.dart';
 import 'package:storysizer/screens/quick_sizer_questions.dart';
