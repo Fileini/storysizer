@@ -7,6 +7,7 @@ import 'package:storysizer/screens/history.dart';
 import 'package:storysizer/screens/profile.dart';
 import 'package:storysizer/screens/quick_sizer_name.dart';
 import 'package:storysizer/screens/quick_sizer_questions.dart';
+import 'package:storysizer/screens/result.dart';
 import 'package:storysizer/services/auth_service.dart';
 
 class StszRoutes {
@@ -83,6 +84,13 @@ class StszRoutes {
                         child: MenuScreen(
                             view: QuickSizerQuestionsView(
                                 name: state.pathParameters['name']!)))),
+                GoRoute(
+                  path: 'estimation',
+                  pageBuilder: (context, state) => _animatedPage(
+                    state: state,
+                    child: MenuScreen(view: ResultView()),
+                  ),
+                ),                
               ],
             ),
           ],

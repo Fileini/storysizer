@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:storysizer/widgets/history-item.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -67,10 +68,15 @@ class _HistoryViewState extends State<HistoryView> {
                           titles.removeAt(index);
                           points.removeAt(index);
                           descriptions.removeAt(index);
-                        });
+                        }
+                        );
+                        
                         // Chiamata alla funzione per cancellare l'elemento dalla fonte dati
                         deleteHistoryItem(removedId);
                       },
+                      onTap: (){
+                          context.go('/estimation');
+                        }
                     );
                   }),
                 ),
