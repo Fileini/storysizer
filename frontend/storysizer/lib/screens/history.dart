@@ -75,7 +75,7 @@ class _HistoryViewState extends State<HistoryView> {
                         deleteHistoryItem(removedId);
                       },
                       onTap: (){
-                          context.go('/estimation');
+                          context.go('/home/estimation');
                         }
                     );
                   }),

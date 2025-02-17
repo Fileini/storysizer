@@ -48,7 +48,7 @@ class _NameInputScreenState extends State<NameInputScreen> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: TextField(
+                                child: TextField(maxLength: 26,
                                 controller: _controller,
                                 decoration: const InputDecoration(
                                   labelText: "Name",
