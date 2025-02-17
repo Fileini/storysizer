@@ -15,14 +15,7 @@ class ResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // La Scaffold permette di occupare tutto lo schermo
-      body: Card(
-        margin: EdgeInsets.zero,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-        child: SafeArea(
+    return Card(
           child: Column(
             children: [
               // Riga superiore con points, title e outcome
@@ -94,9 +87,8 @@ class ResultView extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
+        );
+  
   }
 }
 
