@@ -8,12 +8,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.stream.Collectors;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +28,11 @@ public class StoryResolver {
     public List<Map<String, Object>> stories() {
       
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        final String owner = (authentication.getPrincipal() instanceof Jwt)
-                ? ((Jwt) authentication.getPrincipal()).getSubject()
-                : "";
+        String owner = "";
+           if (authentication.getPrincipal() instanceof OidcUser){
+               owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+           }else throw new RuntimeException("Non Autorizzato");
+               
     
             // Costruisci l'URL con il parametro di query per il filtraggio
         String url = UriComponentsBuilder.fromUriString(baseUrlstory)
@@ -54,11 +54,11 @@ public class StoryResolver {
     @MutationMapping
     public Map<String, Object> createStory(@Argument String name) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String owner = "";
-        if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getTokenValue(); // tipicamente il claim "sub" rappresenta l'identificatore dell'utente
-        }
+         String owner = "";
+            if (authentication.getPrincipal() instanceof OidcUser){
+                owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+            }else throw new RuntimeException("Non Autorizzato");
+                
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", name);
         payload.put("owner", owner);
@@ -71,9 +71,11 @@ public class StoryResolver {
     @MutationMapping
     public Boolean deleteStory(@Argument String id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    final String owner = (authentication.getPrincipal() instanceof Jwt)
-            ? ((Jwt) authentication.getPrincipal()).getSubject()
-            : "";
+    String owner = "";
+           if (authentication.getPrincipal() instanceof OidcUser){
+               owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+           }else throw new RuntimeException("Non Autorizzato");
+               
     
     String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory)
     .queryParam("owner", owner)
