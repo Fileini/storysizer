@@ -57,12 +57,11 @@ public class StoryResolver {
         String owner = "";
         if (authentication.getPrincipal() instanceof Jwt) {
             Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getSubject(); // tipicamente il claim "sub" rappresenta l'identificatore dell'utente
+            owner = jwt.getTokenValue(); // tipicamente il claim "sub" rappresenta l'identificatore dell'utente
         }
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", name);
         payload.put("owner", owner);
-
         Map<String, Object> createdStory = restTemplate.postForObject(baseUrlstory, payload, Map.class);
 
         return createdStory;
