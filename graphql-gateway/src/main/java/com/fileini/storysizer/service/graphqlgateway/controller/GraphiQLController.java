@@ -8,7 +8,6 @@ public class GraphiQLController {
 
     @GetMapping("/graphiql")
     public String graphiql() {
-        // Assicurati di avere un file "graphiql.html" in src/main/resources/templates
         return "graphiql";
     }
 }

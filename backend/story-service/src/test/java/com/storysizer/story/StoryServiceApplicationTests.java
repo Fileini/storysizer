@@ -1,10 +1,10 @@
-package com.fileini.storysizer.service.estimation;
+package com.storysizer.story;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EstimationServiceApplicationTests {
+class StoryServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

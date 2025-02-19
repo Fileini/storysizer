@@ -4,6 +4,11 @@ type Query {
   _empty: String
 }
 
+type Mutation {
+  createStory(name: String!): Story
+  deleteStory(id: ID!): Boolean
+}
+
 type Story @key(fields: "id") {
   id: ID!
   name: String!
@@ -14,8 +19,8 @@ type Estimation @key(fields: "id") {
   id: ID!
   owner: String!
   complexity: Int!
-  reach: Story
-  storyId: ID!
+  reach: Int!
+  story: Story!
   dimensions: Int!
   risk: Int!
   interaction: Int!

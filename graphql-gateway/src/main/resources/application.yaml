@@ -21,10 +21,10 @@ spring:
           issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
 
   graphql:
-    federation:
-      services:
-        stories: http://story-service.service-prod.svc.cluster.local:8080/graphql
-        estimations: http://estimations-service.service-prod.svc.cluster.local:8081/graphql
+#    federation:
+#      services:
+#        stories: http://story-service.service-prod.svc.cluster.local:8080/graphql
+#        estimations: http://estimations-service.service-prod.svc.cluster.local:8081/graphql
     path: /graphql
     graphiql:
       enabled: true
