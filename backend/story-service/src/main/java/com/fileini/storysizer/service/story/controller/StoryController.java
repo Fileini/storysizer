@@ -26,6 +26,11 @@ public class StoryController {
         return repository.findById(id).orElseThrow();
     }
 
+    @GetMapping("/{owner}")
+    public List<Story> getStoryByOwner(@PathVariable String owner) {
+        return repository.findAll().parallelStream().filter(s -> s.getOwner().equals(owner)).toList();
+    }
+
     @PostMapping
     public Story createStory(@RequestBody Story story) {
         return repository.save(story);
