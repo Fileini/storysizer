@@ -22,7 +22,7 @@ public class StoryResolver {
 
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
+    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories/owner";
 
     @QueryMapping
     public List<Map<String, Object>> stories() {
