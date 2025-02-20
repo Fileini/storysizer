@@ -22,7 +22,7 @@ public class StoryResolver {
 
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories/owner";
+    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
 
     @QueryMapping
     public List<Map<String, Object>> stories() {
@@ -35,7 +35,7 @@ public class StoryResolver {
                
     
             // Costruisci l'URL con il parametro di query per il filtraggio
-        String url = UriComponentsBuilder.fromUriString(baseUrlstory)
+        String url = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
                 .pathSegment(owner)
                 .toUriString();
 
@@ -77,8 +77,8 @@ public class StoryResolver {
            }else throw new RuntimeException("Non Autorizzato");
                
     
-    String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory)
-    .queryParam("owner", owner)
+    String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
+    .pathSegment(owner)
     .queryParam("id", id)
     .toUriString();
 

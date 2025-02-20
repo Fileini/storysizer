@@ -27,8 +27,18 @@ public class StoryController {
     }
 
     @GetMapping("/owner/{owner}")
-    public List<Story> getStoryByOwner(@PathVariable String owner) {
-        return repository.findAll().parallelStream().filter(s -> s.getOwner().equals(owner)).toList();
+    public List<Story> getStoryByOwner(@PathVariable String owner, @RequestParam(required = false) Long id) {
+        if (id == null){
+            return repository.findAll()
+            .parallelStream()
+            .filter(s -> s.getOwner().equals(owner))
+            .toList();
+        } else 
+        return repository.findAll()
+        .parallelStream()
+        .filter(s -> s.getOwner().equals(owner))
+        .filter(s -> s.getId().equals(id))
+        .toList();
     }
 
     @PostMapping
