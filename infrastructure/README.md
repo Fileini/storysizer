@@ -1,3 +1,8 @@
+
+#  Diagramma dell'Infrastruttura
+
+![Alt text here](../docs/infrastructure-diagram/storysizerinfrastructure.drawio.svg)
+
 # Descrizione dell'Infrastruttura Kubernetes
 
 ## 1. Cluster Overview
@@ -116,8 +121,5 @@ All'interno di questo namespace sono presenti due microservizi, ciascuno esposto
 
 ---
 
-## 5. Diagramma dell'Infrastruttura
 
-Un diagramma generato con la libreria [Diagrams](https://diagrams.mingrammer.com/) 
-_(Consulta il file `k8s_infra_diagram.png` per una rappresentazione visiva completa.)_
 
