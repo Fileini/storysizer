@@ -102,7 +102,7 @@ public class StoryResolver {
     }
     
     // Se la verifica ha successo, inoltra la richiesta di cancellazione al microservizio
-    String urlDelete = baseUrlstory + id;
+    String urlDelete = baseUrlstory +'/'+ id;
     restTemplate.delete(urlDelete);
     
     return true;
