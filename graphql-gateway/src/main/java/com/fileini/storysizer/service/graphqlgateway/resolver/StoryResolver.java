@@ -31,7 +31,7 @@ public class StoryResolver {
         String owner = "";
            if (authentication.getPrincipal() instanceof OidcUser){
                owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-           }else throw new RuntimeException("Non Autorizzato");
+           }else return null;
                
     
             // Costruisci l'URL con il parametro di query per il filtraggio
@@ -57,7 +57,7 @@ public class StoryResolver {
          String owner = "";
             if (authentication.getPrincipal() instanceof OidcUser){
                 owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-            }else throw new RuntimeException("Non Autorizzato");
+            }else return null;
                 
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", name);
@@ -74,7 +74,7 @@ public class StoryResolver {
     String owner = "";
            if (authentication.getPrincipal() instanceof OidcUser){
                owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-           }else throw new RuntimeException("Non Autorizzato");
+           }else return false;
                
     
     String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
@@ -93,12 +93,12 @@ public class StoryResolver {
     List<Map<String, Object>> story = response.getBody();
     
     if (story.isEmpty()) {
-        throw new RuntimeException("Story non trovata");
+        return false;
     }
     
     // Verifica che la story appartenga all'utente autenticato
     if (!owner.equals(story.get(0).get("owner"))) {
-        throw new RuntimeException("Non autorizzato a cancellare questa story");
+        return false;
     }
     
     // Se la verifica ha successo, inoltra la richiesta di cancellazione al microservizio
