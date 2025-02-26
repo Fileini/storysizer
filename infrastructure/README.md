@@ -8,7 +8,8 @@
 ## 1. Cluster Overview
 
 - **Kubernetes Cluster**: Basato su **k3s**, con un **nodo master** connesso a Internet.
-- **Ingress Controller (Traefik)**: Installato nel namespace `kube-system` e configurato per essere accessibile all'IP `192.168.1.30`. Questo controller gestisce l'instradamento del traffico in ingresso verso le varie applicazioni tramite le relative **Ingress Route**.
+- **Ingress Controller (Traefik Admin)**: Installato nel namespace `kube-system` e configurato per essere accessibile all'IP `192.168.1.30`. Questo controller gestisce l'instradamento del traffico in ingresso verso le varie applicazioni tramite le relative **Ingress Route**.
+- **Ingress Controller (Traefik Public)**: Installato nel namespace `kube-system` e configurato per essere accessibile all'IP `192.168.1.31`. Questo controller gestisce l'instradamento del traffico in ingresso verso le varie applicazioni tramite le relative **Ingress Route**.
 - **MetalLB**: Installato nel namespace `metallb-system` per la gestione degli IP esterni. MetalLB abilita l'esposizione dei servizi di tipo **LoadBalancer** nel cluster.
 
 ---
