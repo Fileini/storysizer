@@ -6,6 +6,7 @@ type Query {
 
 type Mutation {
   createStory(name: String!): Story
+  createEstimation(name: String!,complexity: Int!,reach: Int!,story: String!,dimension: Int!, interaction: Int!): Estimation
   deleteStory(id: ID!): Boolean
 }
 
@@ -24,6 +25,7 @@ type Estimation @key(fields: "id") {
   dimensions: Int!
   risk: Int!
   interaction: Int!
+  size: Int
 }
 
 extend type Query {

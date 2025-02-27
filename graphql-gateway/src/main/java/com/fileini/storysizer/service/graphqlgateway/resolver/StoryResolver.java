@@ -23,6 +23,8 @@ public class StoryResolver {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
+    private final String baseUrlestimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
+
 
     @QueryMapping
     public List<Map<String, Object>> stories() {
@@ -105,6 +107,13 @@ public class StoryResolver {
     String urlDelete = baseUrlstory +'/'+ id;
     restTemplate.delete(urlDelete);
     
+    // Cascade delete Estimation
+    String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlstory + "/story")
+    .pathSegment(id)
+    .queryParam("owner", owner)
+    .toUriString();
+    restTemplate.delete(urlDeleteEstimations);
+
     return true;
 
     }
