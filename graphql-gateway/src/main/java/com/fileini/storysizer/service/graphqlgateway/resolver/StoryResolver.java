@@ -103,9 +103,6 @@ public class StoryResolver {
         return false;
     }
     
-    // Se la verifica ha successo, inoltra la richiesta di cancellazione al microservizio
-    String urlDelete = baseUrlstory +'/'+ id;
-    restTemplate.delete(urlDelete);
     
     // Cascade delete Estimation
     String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlestimation + "/story")
@@ -113,6 +110,11 @@ public class StoryResolver {
     .queryParam("owner", owner)
     .toUriString();
     restTemplate.delete(urlDeleteEstimations);
+
+    //delete story
+    String urlDelete = baseUrlstory +'/'+ id;
+    restTemplate.delete(urlDelete);
+
 
     return true;
 
