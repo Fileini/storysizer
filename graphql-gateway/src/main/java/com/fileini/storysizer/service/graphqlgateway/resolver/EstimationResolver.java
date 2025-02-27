@@ -68,7 +68,6 @@ public class EstimationResolver {
 
 
     @MutationMapping   
-
     public Map<String, Object> createEstimation(@Arguments String name, Integer complexity,Integer reach, Integer dimensions,Integer risk,Integer interaction, String storyId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          String owner = "";
