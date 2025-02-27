@@ -54,7 +54,7 @@ public class EstimationResolver {
 
     @SchemaMapping(typeName = "Estimation", field = "story")
     public Map<String, Object> getStory(Map<String, Object> estimation) {
-        Long storyId = (Long) estimation.get("story");
+        Long storyId = (Long) estimation.get("storyId");
 
         if (storyId == null) {
             return null;
