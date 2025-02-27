@@ -1,7 +1,7 @@
 package com.fileini.storysizer.service.graphqlgateway.resolver;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.graphql.data.method.annotation.Arguments;
+import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
@@ -68,7 +68,14 @@ public class EstimationResolver {
 
 
     @MutationMapping   
-    public Map<String, Object> createEstimation(@Arguments String name, Integer complexity,Integer reach, Integer dimensions,Integer risk,Integer interaction, String storyId) {
+    public Map<String, Object> createEstimation(
+        @Argument String name, 
+        @Argument Integer complexity,
+        @Argument Integer reach,
+        @Argument Integer dimension,
+        @Argument Integer risk,
+        @Argument Integer interaction, 
+        @Argument String storyId ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          String owner = "";
             if (authentication.getPrincipal() instanceof OidcUser){
@@ -106,7 +113,7 @@ public class EstimationResolver {
         payload.put("complexity", complexity);
         payload.put("reach", reach);
         payload.put("story", story.get(0).get("id"));
-        payload.put("dimensions", dimensions);
+        payload.put("dimensions", dimension);
         payload.put("risk", risk);
         payload.put("interaction", interaction);
 
