@@ -2,6 +2,8 @@ package com.fileini.storysizer.service.estimation.controller;
 
 import com.fileini.storysizer.service.estimation.model.Estimation;
 import com.fileini.storysizer.service.estimation.repository.EstimationRepository;
+import com.fileini.storysizer.service.estimation.service.EstimationService;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +13,12 @@ import java.util.List;
 public class EstimationController {
 
     private final EstimationRepository repository;
+    private final EstimationService estimationService;
 
-    public EstimationController(EstimationRepository repository) {
+
+    public EstimationController(EstimationRepository repository, EstimationService estimationService) {
         this.repository = repository;
+        this.estimationService = estimationService;
     }
 
     @GetMapping
@@ -56,13 +61,31 @@ public class EstimationController {
 
     @PostMapping
     public Estimation createEstimation(@RequestBody Estimation estimation) {
-        estimation.setSize(22);
+        //maximum values
+        if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(5);} 
+        if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(5);}
+        if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(5);}
+        if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(5);}
+        if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(5);}
+
+        estimation.setSize(estimationService.calculateSize(estimation));
+
         return repository.save(estimation);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}")//ancora da implementare gestione maxsize
     public Estimation updateEstimation(@PathVariable Long id, @RequestBody Estimation estimation) {
         estimation.setId(id);
+
+         //maximum values
+         if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(5);} 
+         if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(5);}
+         if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(5);}
+         if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(5);}
+         if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(5);}
+
+         estimation.setSize(estimationService.calculateSize(estimation));
+
         return repository.save(estimation);
     }
 
