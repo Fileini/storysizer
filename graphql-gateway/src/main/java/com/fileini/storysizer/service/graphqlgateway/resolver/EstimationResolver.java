@@ -67,8 +67,9 @@ public class EstimationResolver {
     }
 
 
-    @MutationMapping
-    public Map<String, Object> createEstimation(@Arguments String name, Integer complexity,Integer dimensions,Integer risk,Integer interaction, String storyId) {
+    @MutationMapping   
+
+    public Map<String, Object> createEstimation(@Arguments String name, Integer complexity,Integer reach, Integer dimensions,Integer risk,Integer interaction, String storyId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          String owner = "";
             if (authentication.getPrincipal() instanceof OidcUser){
@@ -104,6 +105,7 @@ public class EstimationResolver {
         payload.put("name", name);
         payload.put("owner", story.get(0).get("owner"));
         payload.put("complexity", complexity);
+        payload.put("reach", reach);
         payload.put("story", story.get(0).get("id"));
         payload.put("dimensions", dimensions);
         payload.put("risk", risk);
