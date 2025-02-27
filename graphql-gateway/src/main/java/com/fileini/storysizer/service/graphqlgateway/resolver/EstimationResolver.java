@@ -112,7 +112,7 @@ public class EstimationResolver {
         payload.put("owner", story.get(0).get("owner"));
         payload.put("complexity", complexity);
         payload.put("reach", reach);
-        payload.put("story", story.get(0).get("id"));
+        payload.put("storyId", story.get(0).get("id"));
         payload.put("dimensions", dimension);
         payload.put("risk", risk);
         payload.put("interaction", interaction);
