@@ -8,6 +8,7 @@ type Mutation {
   createStory(name: String!): Story
   createEstimation(name: String!, complexity: Int!,reach: Int!,dimension: Int!,risk: Int!, interaction: Int! ,storyId: String!): Estimation
   deleteStory(id: ID!): Boolean
+  deleteEstimation(id: ID!): Boolean
 }
 
 type Story @key(fields: "id") {

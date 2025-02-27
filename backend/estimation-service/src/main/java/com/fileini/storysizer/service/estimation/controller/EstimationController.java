@@ -53,6 +53,11 @@ public class EstimationController {
         return repository.save(estimation);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteEstimationsById(@PathVariable Long storyId) {
+        repository.deleteById(storyId);
+    }
+
     @DeleteMapping("/story/{id}")
     public void deleteEstimationsByStoryAndOwner(@PathVariable Long storyId, @RequestParam(required = true) String owner) {
         List<Estimation> list = repository.findAll()

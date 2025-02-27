@@ -85,7 +85,7 @@ public class EstimationResolver {
             
         String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
         .pathSegment(owner)
-        .queryParam("id", storyId)
+        .queryParam("storyId", storyId)
         .toUriString();
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
@@ -122,6 +122,47 @@ public class EstimationResolver {
         return createdStory;
     }
 
+    @MutationMapping
+    public Boolean deleteEstimation(@Argument String id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String owner = "";
+           if (authentication.getPrincipal() instanceof OidcUser){
+               owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+           }else return false;
+               
+    
+    String urlGet = UriComponentsBuilder.fromUriString(baseUrlestimation + "/owner")
+    .pathSegment(owner)
+    .queryParam("id", id)
+    .toUriString();
+
+    ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                urlGet,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        );
+
+
+    List<Map<String, Object>> estimation = response.getBody();
+    
+    if (estimation.isEmpty()) {
+        return false;
+    }
+    
+    // Verifica che la story appartenga all'utente autenticato
+    if (!owner.equals(estimation.get(0).get("owner"))) {
+        return false;
+    }
+    
+    // Se la verifica ha successo, inoltra la richiesta di cancellazione al microservizio
+    String urlDelete = baseUrlestimation +'/'+ id;
+    restTemplate.delete(urlDelete);
+
+
+    return true;
+
+    }
 
 
 }
