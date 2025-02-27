@@ -21,17 +21,30 @@ public class EstimationController {
         return repository.findAll();
     }
     @GetMapping("/owner/{owner}")
-    public List<Estimation> getEstimationByOwner(@PathVariable String owner, @RequestParam(required = false) Long storyId) {
-        if (storyId == null){
+    public List<Estimation> getEstimationByOwner(@PathVariable String owner, @RequestParam(required = false) Long id, @RequestParam(required = false) Long storyId) {
+        if (id == null){
+            if (storyId == null){
+                return repository.findAll()
+                .parallelStream()
+                .filter(e -> e.getOwner().equals(owner))
+                .toList();} else
             return repository.findAll()
             .parallelStream()
             .filter(e -> e.getOwner().equals(owner))
+            .filter(e -> e.getStoryId().equals(storyId))
+            .toList();
+        } else if (storyId == null){
+            return repository.findAll()
+            .parallelStream()
+            .filter(e -> e.getOwner().equals(owner))
+            .filter(e -> e.getId().equals(id))
             .toList();
         } else 
         return repository.findAll()
         .parallelStream()
         .filter(e -> e.getOwner().equals(owner))
         .filter(e -> e.getStoryId().equals(storyId))
+        .filter(e -> e.getId().equals(id))
         .toList();
     }
 
@@ -58,11 +71,11 @@ public class EstimationController {
         repository.deleteById(id);
     }
 
-    @DeleteMapping("/story/{id}")
-    public void deleteEstimationsByStoryAndOwner(@PathVariable Long id, @RequestParam(required = true) String owner) {
+    @DeleteMapping("/story/{storyId}")
+    public void deleteEstimationsByStoryAndOwner(@PathVariable Long storyId, @RequestParam(required = true) String owner) {
         List<Estimation> list = repository.findAll()
         .parallelStream()
-        .filter(e -> e.getStoryId().equals(id))
+        .filter(e -> e.getStoryId().equals(storyId))
         .filter(e -> e.getOwner().equals(owner))
         .toList();
         list.forEach(e -> repository.deleteById(e.getId()));
