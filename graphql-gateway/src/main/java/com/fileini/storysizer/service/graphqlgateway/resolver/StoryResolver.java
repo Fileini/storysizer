@@ -108,7 +108,7 @@ public class StoryResolver {
     restTemplate.delete(urlDelete);
     
     // Cascade delete Estimation
-    String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlstory + "/story")
+    String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlestimation + "/story")
     .pathSegment(id)
     .queryParam("owner", owner)
     .toUriString();
