@@ -54,8 +54,8 @@ public class EstimationController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEstimationsById(@PathVariable Long storyId) {
-        repository.deleteById(storyId);
+    public void deleteEstimationsById(@PathVariable Long id) {
+        repository.deleteById(id);
     }
 
     @DeleteMapping("/story/{id}")
