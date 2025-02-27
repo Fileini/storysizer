@@ -59,10 +59,10 @@ public class EstimationController {
     }
 
     @DeleteMapping("/story/{id}")
-    public void deleteEstimationsByStoryAndOwner(@PathVariable Long storyId, @RequestParam(required = true) String owner) {
+    public void deleteEstimationsByStoryAndOwner(@PathVariable Long id, @RequestParam(required = true) String owner) {
         List<Estimation> list = repository.findAll()
         .parallelStream()
-        .filter(e -> e.getStoryId().equals(storyId))
+        .filter(e -> e.getStoryId().equals(id))
         .filter(e -> e.getOwner().equals(owner))
         .toList();
         list.forEach(e -> repository.deleteById(e.getId()));
