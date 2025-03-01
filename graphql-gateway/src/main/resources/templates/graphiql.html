@@ -21,10 +21,11 @@
   </head>
   <body>
     <div id="graphiql">Loading...</div>
+    
     <script>
-      // Inietta il token dal modello Thymeleaf
       var authToken = /*[[${authToken}]]*/ '';
-      
+      console.log("Auth token:", authToken);
+      // Il fetcher userà authToken per l'header Authorization
       function graphQLFetcher(graphQLParams) {
         return fetch('/graphql', {
           method: 'post',
@@ -50,5 +51,7 @@
         document.getElementById('graphiql')
       );
     </script>
+    
+
   </body>
 </html>
