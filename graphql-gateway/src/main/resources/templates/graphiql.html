@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <title>GraphiQL</title>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/graphiql/graphiql.min.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
     <style>
       body {
-        height: 100vh;
+        height: 100%;
         margin: 0;
         width: 100%;
         overflow: hidden;
@@ -21,32 +21,33 @@
   </head>
   <body>
     <div id="graphiql">Loading...</div>
-    <!-- React and React-DOM via CDN -->
-    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <!-- GraphiQL via CDN -->
-    <script
-      src="https://unpkg.com/graphiql/graphiql.min.js"
-      crossorigin
-    ></script>
     <script>
-      // Funzione per effettuare le richieste verso il tuo endpoint GraphQL
+      // Inietta il token dal modello Thymeleaf
+      var authToken = /*[[${authToken}]]*/ '';
+      
       function graphQLFetcher(graphQLParams) {
-        return fetch("/graphql", {
-          method: "post",
+        return fetch('/graphql', {
+          method: 'post',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
           },
           body: JSON.stringify(graphQLParams),
+          credentials: 'include',
         }).then(function (response) {
-          return response.json();
+          return response.text();
+        }).then(function (responseBody) {
+          try {
+            return JSON.parse(responseBody);
+          } catch (error) {
+            return responseBody;
+          }
         });
       }
-
-      // Renderizza l'interfaccia GraphiQL
+      
       ReactDOM.render(
         React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
-        document.getElementById("graphiql")
+        document.getElementById('graphiql')
       );
     </script>
   </body>
