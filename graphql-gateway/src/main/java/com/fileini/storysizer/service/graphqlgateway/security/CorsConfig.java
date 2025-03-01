@@ -9,7 +9,7 @@ public class CorsConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
-      .allowedOrigins("http://localhost:3000") // Sostituisci con il dominio del client oppure usa "*" per testing
+      .allowedOrigins("http://localhost:36145/*","https://storysizer.public.cluster.local.com/*") // Sostituisci con il dominio del client oppure usa "*" per testing
       .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
       .allowedHeaders("*")
       .allowCredentials(true)
