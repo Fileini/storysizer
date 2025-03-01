@@ -18,12 +18,12 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
     super.initState();
     // Carica le stories appena la view viene creata
     Future.microtask(() =>
-        ref.read(storiesNotifierProvider.notifier).loadStories());
+        ref.read(estimationsNotifierProvider.notifier).loadEstimations());
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(storiesNotifierProvider);
+    final state = ref.watch(estimationsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,24 +33,24 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
           ? const Center(child: CircularProgressIndicator())
           : state.error != null
               ? Center(child: Text("Errore: ${state.error}"))
-              : state.stories == null || state.stories!.isEmpty
+              : state.estimations == null || state.estimations!.isEmpty
                   ? const Center(child: Text("Nessuna storia presente"))
                   : ListView.builder(
-                      itemCount: state.stories!.length,
+                      itemCount: state.estimations!.length,
                       itemBuilder: (context, index) {
-                        final story = state.stories![index];
+                        final estimation = state.estimations![index];
                         return HistoryItem(
-                          id: story.id,
-                          title: story.name,
+                          id: estimation.story.id,
+                          title: estimation.story.name,
                           // Ignoriamo il campo description
                           description: '',
                           // Per esempio, possiamo mostrare l'owner come "points"
-                          points: story.owner,
+                          points: estimation.size.toString(),
                           icon: CupertinoIcons.delete_solid,
                           onDeleted: () {
                             ref
                                 .read(storiesNotifierProvider.notifier)
-                                .deleteStory(story.id);
+                                .deleteStory(estimation.story.id);
                           },
                           onTap: () {
                             context.go('/home/estimation');

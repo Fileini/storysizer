@@ -96,7 +96,7 @@ public class EstimationResolver {
             
         String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
         .pathSegment(owner)
-        .queryParam("storyId", storyId)
+        .queryParam("id", storyId)
         .toUriString();
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(

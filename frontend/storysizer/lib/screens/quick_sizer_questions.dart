@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:storysizer/widgets/question.dart';
+import 'package:storysizer/providers.dart';
 
-class QuickSizerQuestionsView extends StatefulWidget {
+class QuickSizerQuestionsView extends ConsumerStatefulWidget {
   final String name;
 
-  const QuickSizerQuestionsView({super.key,required this.name});
+  const QuickSizerQuestionsView({Key? key, required this.name}) : super(key: key);
 
   @override
-  _QuickSizerQuestionsViewState createState() => _QuickSizerQuestionsViewState();
+  ConsumerState<QuickSizerQuestionsView> createState() => _QuickSizerQuestionsViewState();
 }
 
-class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
+class _QuickSizerQuestionsViewState extends ConsumerState<QuickSizerQuestionsView> {
   final List<String> questions = [
     "Reach",
     "Complexity",
@@ -20,12 +23,13 @@ class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
     "Interaction"
   ];
 
+  // Ignoriamo le descrizioni, oppure le lasciamo vuote
   final List<String> descriptions = [
-    "How much do you think the technical aspects of this story fall within the scrum team’s competences?",
-    "How interconnected are the different parts of this story?",
-    "How many different parts do you think this story has?",
-    "How high do you think the probability of encountering risks with significant impact on the realisation is?",
-    "How many stakeholders are involved outside the scrum team?"
+    "",
+    "",
+    "",
+    "",
+    ""
   ];
 
   final List<List<String>> labels = [
@@ -38,52 +42,91 @@ class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
 
   final List<IconData> icons = [
     CupertinoIcons.check_mark_circled, // Reach
-    CupertinoIcons.arrow_branch, // Complexity
-    CupertinoIcons.layers, // Dimensions
+    CupertinoIcons.arrow_branch,         // Complexity
+    CupertinoIcons.layers,               // Dimensions
     CupertinoIcons.exclamationmark_triangle, // Risk
-    CupertinoIcons.person_3_fill // Interaction
+    CupertinoIcons.person_3_fill         // Interaction
   ];
 
+  // Valori degli slider inizializzati a 2 (valore medio)
   List<int> selectedValues = List.filled(5, 2);
-
-  Color getSliderColor(double value) {
-    int level = value.round();
-    return Color.lerp(Colors.blue, Colors.red, level / 4)!;
-  }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> list = List.generate(questions.length, (index) {
-                    return QuestionWidget(
-                      question: questions[index],
-                      description: descriptions[index],
-                      labels: labels[index],
-                      icon: icons[index], // Passa l'icona al widget
-                    );
-                  });
+      return QuestionWidget(
+        question: questions[index],
+        description: descriptions[index],
+        labels: labels[index],
+        icon: icons[index],
+        selectedValue: selectedValues[index],
+        onChanged: (value) {
+          setState(() {
+            selectedValues[index] = value;
+          });
+        },
+      );
+    });
 
-    list.add(ElevatedButton(
-            onPressed: () {
-              
-            },
-            style: ElevatedButton.styleFrom(
-              fixedSize: const Size(200, 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            ),
-            child: Text(
-              'Esttimate',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),);
+    // Bottone Estimate che crea prima la Story e poi l'Estimation
+    list.add(
+      ElevatedButton(
+        onPressed: () async {
+          final repository = ref.read(dataRepositoryProvider);
+          try {
+            // Creazione della Story con il nome passato
+            final story = await repository.createStory(widget.name);
+            // Mappatura dei valori:
+            // - Reach    -> selectedValues[0]
+            // - Complexity -> selectedValues[1]
+            // - Dimensions -> selectedValues[2]
+            // - Risk       -> selectedValues[3]
+            // - Interaction-> selectedValues[4]
+            print("storia creata :"+story.toString());
+            print("storia creata :"+story.id);
+            final estimation = await repository.createEstimation(
+              name: widget.name,
+              complexity: selectedValues[1],
+              reach: selectedValues[0],
+              dimension: selectedValues[2],
+              risk: selectedValues[3],
+              interaction: selectedValues[4],
+              storyId: story.id,
+            );
+
+
+            // Puoi opzionalmente navigare o mostrare un messaggio di successo
+            print("Estimation creata: ${estimation.id}");
+            print("Estimation creata sto: ${estimation.story.id}");
+            // Ad esempio, naviga alla pagina dei dettagli o torna indietro
+            context.go('/home/estimation');
+          } catch (e) {
+            print("Errore durante la creazione dell'estimazione: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Errore durante la creazione dell'estimazione")),
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          fixedSize: const Size(200, 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        ),
+        child: Text(
+          'Estimate',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
 
     return Column(
-      children: [Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Center(child: Text('Sizing: '+ widget.name)),
-      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: Center(child: Text('Sizing: ' + widget.name)),
+        ),
         Expanded(
           child: SingleChildScrollView(
             child: Center(

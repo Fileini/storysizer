@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:storysizer/services/auth_service.dart';
 import 'package:storysizer/services/data_repository.dart';
+import 'package:storysizer/services/estimation_notifier.dart';
 import 'package:storysizer/services/story_notifier.dart';
 import 'services/themeprovider.dart';
 import 'routes.dart';
@@ -19,10 +20,14 @@ final storyCreationNotifierProvider = StateNotifierProvider<StoryCreationNotifie
   return StoryCreationNotifier(repository: repository);
 });
 
-// Provider che espone lo StoriesNotifier, utilizzando il DataRepository.
 final storiesNotifierProvider = StateNotifierProvider<StoriesNotifier, StoriesState>((ref) {
   final repository = ref.watch(dataRepositoryProvider);
   return StoriesNotifier(repository: repository);
+});
+
+final estimationsNotifierProvider = StateNotifierProvider<EstimationsNotifier, EstimationsState>((ref) {
+  final repository = ref.watch(dataRepositoryProvider);
+  return EstimationsNotifier(repository: repository);
 });
 
 final dataRepositoryProvider = Provider<DataRepository>((ref) {

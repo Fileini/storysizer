@@ -77,6 +77,7 @@ Future<String> getAccessToken() async {
     await login();
   }
   await keycloak.updateToken();
+  
   return keycloak.getToken(); 
 }
 
