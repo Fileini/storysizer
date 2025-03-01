@@ -42,7 +42,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Specifica l'origine autorizzata; per il testing puoi usare "*" o l'origine esatta del tuo client
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3645", "https://storysizer.public.cluster.local.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:36145", "https://storysizer.public.cluster.local.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         configuration.setAllowCredentials(true);
