@@ -38,6 +38,8 @@ final graphqlClientProvider = Provider<GraphQLClient>((ref) {
   final authLink = AuthLink(
     getToken: () async {
       final token = await authService.getAccessToken();
+          print('Token usato per la richiesta: $token'); // Debug
+
       return 'Bearer $token';
     },
   );

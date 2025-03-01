@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,9 +31,14 @@ public class EstimationResolver {
     public List<Map<String, Object>> estimations() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String owner = "";
-           if (authentication.getPrincipal() instanceof OidcUser){
-               owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-           }else return null;
+        if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            owner = jwt.getClaimAsString("preferred_username");
+        } else if (authentication.getPrincipal() instanceof OidcUser) {
+            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+        } else {
+            return null;
+        }
                
     
             // Costruisci l'URL con il parametro di query per il filtraggio
@@ -78,9 +84,14 @@ public class EstimationResolver {
         @Argument String storyId ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
          String owner = "";
-            if (authentication.getPrincipal() instanceof OidcUser){
-                owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-            }else return null;
+         if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            owner = jwt.getClaimAsString("preferred_username");
+        } else if (authentication.getPrincipal() instanceof OidcUser) {
+            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+        } else {
+            return null;
+        }
         
             
         String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
@@ -126,9 +137,14 @@ public class EstimationResolver {
     public Boolean deleteEstimation(@Argument String id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String owner = "";
-           if (authentication.getPrincipal() instanceof OidcUser){
-               owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-           }else return false;
+    if (authentication.getPrincipal() instanceof Jwt) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        owner = jwt.getClaimAsString("preferred_username");
+    } else if (authentication.getPrincipal() instanceof OidcUser) {
+        owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+    } else {
+        return null;
+    }
                
     
     String urlGet = UriComponentsBuilder.fromUriString(baseUrlestimation + "/owner")

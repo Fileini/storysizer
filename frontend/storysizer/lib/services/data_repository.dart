@@ -22,7 +22,8 @@ class DataRepository {
     if(result.hasException) {
       throw Exception(result.exception.toString());
     }
-    
+    print("Risposta API: ${result.data}");
+
     final List storiesData = result.data?['stories'] ?? [];
     return storiesData.map((story) => Story.fromJson(story)).toList();
   }
