@@ -46,14 +46,13 @@ metadata:
   name: gateway-ingress
   namespace: service-prod
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: "default/cors@kubernetescrd"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     cert-manager.io/cluster-issuer: selfsigned-clusterissuer
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Origin: "*"
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Methods: "GET, POST, PUT, DELETE, OPTIONS"
-    traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Headers: "Content-Type, Authorization"
+    traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Headers: "Content-Type, Authorization, X-Requested-With, Accept"
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Credentials: "true"
-    traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Max-Age: "100"
+    traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Max-Age: "3600"
 spec:
   ingressClassName: traefik-public
   rules:
