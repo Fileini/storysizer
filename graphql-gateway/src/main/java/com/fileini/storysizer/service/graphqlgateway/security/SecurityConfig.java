@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -31,6 +33,7 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/graphiql", true)
                 .permitAll()
             )
+            .oauth2ResourceServer(oauth2 -> oauth2 .jwt(Customizer.withDefaults()) )
             .logout(logout -> logout.permitAll());
             
 
@@ -41,7 +44,6 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Specifica l'origine autorizzata; per il testing puoi usare "*" o l'origine esatta del tuo client
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:36145", "https://storysizer.public.cluster.local.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -52,4 +54,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+    String jwkSetUri = "https://keycloak.public.cluster.local.com/realms/storysizer/protocol/openid-connect/certs";
+    return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+  }
 }
