@@ -4,6 +4,7 @@ metadata:
   name: jenkins-ingress
   namespace: jenkins
   annotations:
+    cert-manager.io/cluster-issuer: selfsigned-clusterissuer
 spec:
   ingressClassName: traefik-admin
   rules:

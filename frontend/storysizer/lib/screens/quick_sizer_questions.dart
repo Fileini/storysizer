@@ -53,6 +53,32 @@ class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> list = List.generate(questions.length, (index) {
+                    return QuestionWidget(
+                      question: questions[index],
+                      description: descriptions[index],
+                      labels: labels[index],
+                      icon: icons[index], // Passa l'icona al widget
+                    );
+                  });
+
+    list.add(ElevatedButton(
+            onPressed: () {
+              
+            },
+            style: ElevatedButton.styleFrom(
+              fixedSize: const Size(200, 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: Text(
+              'Esttimate',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),);
+
     return Column(
       children: [Padding(
         padding: const EdgeInsets.all(3.0),
@@ -66,14 +92,7 @@ class _QuickSizerQuestionsViewState extends State<QuickSizerQuestionsView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(questions.length, (index) {
-                    return QuestionWidget(
-                      question: questions[index],
-                      description: descriptions[index],
-                      labels: labels[index],
-                      icon: icons[index], // Passa l'icona al widget
-                    );
-                  }),
+                  children: list,
                 ),
               ),
             ),

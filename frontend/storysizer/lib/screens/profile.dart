@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:storysizer/main.dart';
 import 'package:storysizer/services/auth_service.dart';
+import 'package:storysizer/services/themeprovider.dart';
 
 class ProfileScreen extends StatefulWidget {
   static String routeName = 'ProfileScreen';

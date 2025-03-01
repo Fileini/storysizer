@@ -56,9 +56,6 @@ class AuthService {
       ),
     );
 
-
-
-
   }
 
   Future<void> login() async {
@@ -74,6 +71,14 @@ class AuthService {
       // log error
     }
   }
+Future<String> getAccessToken() async {
+  
+  if (!keycloak.authenticated) {
+    await login();
+  }
+  await keycloak.updateToken();
+  return keycloak.getToken(); 
+}
 
 Future<void> handleEvent(KeycloakEvent event) async {
     switch (event.type) {

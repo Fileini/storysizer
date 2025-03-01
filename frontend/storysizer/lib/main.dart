@@ -5,68 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:storysizer/services/auth_service.dart';
 import 'helpers/is_debug.dart';
 import 'helpers/theme.dart';
-import 'routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'providers.dart'; // importiamo i provider definiti
 
-
-
-
-class ThemeModeProvider extends ChangeNotifier {
-  ThemeMode _mode = ThemeMode.system;
-  bool _isInitialized = false;
-
-  ThemeMode get mode => _mode;
-  bool get isInitialized => _isInitialized;
-
-  ThemeModeProvider() {
-    _loadTheme();
-  }
-
-  void changeMode(bool isDarkMode) {
-    _mode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
-    _saveTheme(isDarkMode);
-    notifyListeners();
-  }
-
-  Future<void> _loadTheme() async {
-  final prefs = await SharedPreferences.getInstance();
-  ThemeMode newMode;
-
-  if (!prefs.containsKey('isDarkMode')) {
-    // Se è la prima volta, prendi il valore dal sistema
-    final Brightness systemBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    newMode = systemBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
-  } else {
-    final isDark = prefs.getBool('isDarkMode') ?? false;
-    newMode = isDark ? ThemeMode.dark : ThemeMode.light;
-  }
-
-  if (_mode != newMode || !_isInitialized) { // ✅ Controllo extra per evitare blocchi
-    _mode = newMode;
-    _isInitialized = true;
-    notifyListeners();
-  }
-}
-  Future<void> _saveTheme(bool isDarkMode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', isDarkMode);
-  }
-}
-
-class StorySizer extends StatelessWidget {
+class StorySizer extends ConsumerWidget {
   const StorySizer({super.key});  
 
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeModeProvider>(context);
-    final routerProvider = Provider.of<StszRoutes>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Utilizziamo ref.watch per recuperare i provider
 
     return MaterialApp.router(
-      routerConfig: routerProvider.router,
+      routerConfig: ref.watch(routesProvider).router,
       debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.mode,
+      themeMode: ref.watch(themeModeProvider).mode,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
     );
@@ -79,32 +32,25 @@ Future<void> main() async {
   runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      
       FlutterError.onError = (FlutterErrorDetails details) {
         if (isInDebugMode) {
           print('Caught Framework Error!');
           FlutterError.dumpErrorToConsole(details);
         } else {
-          Zone.current.handleUncaughtError(
-              details.exception, details.stack ?? StackTrace.empty);
+          Zone.current.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
         }
       };
 
       await AuthService.instance.init();
 
-      await SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp],
-      );
-      setUrlStrategy(PathUrlStrategy()); // 🔥 Aggiunge PathUrlStrategy per Flutter Web
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp],);
 
+      setUrlStrategy(PathUrlStrategy()); 
       runApp(
-       MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => ThemeModeProvider()),
-      Provider<StszRoutes>(create: (context) => StszRoutes()),
-    ],
-    child: const StorySizer(),
-  ),
-      
+        ProviderScope(
+          child: const StorySizer(),
+        ),
       );
     },
     (error, stackTrace) async {

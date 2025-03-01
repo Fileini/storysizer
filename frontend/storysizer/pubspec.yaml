@@ -47,6 +47,8 @@ dependencies:
   flex_color_scheme: ^8.1.0
   shared_preferences: ^2.5.1
   syncfusion_flutter_charts: ^28.2.5+1
+  graphql_flutter: ^5.2.0-beta.8
+  flutter_riverpod: ^2.6.1
 
 dev_dependencies:
   flutter_test:
