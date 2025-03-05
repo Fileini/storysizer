@@ -48,8 +48,8 @@ class _QuickSizerQuestionsViewState extends ConsumerState<QuickSizerQuestionsVie
     CupertinoIcons.person_3_fill         // Interaction
   ];
 
-  // Valori degli slider inizializzati a 2 (valore medio)
-  List<int> selectedValues = List.filled(5, 2);
+  // Valori degli slider inizializzati a 1
+  List<int> selectedValues = List.filled(5, 0);
 
   @override
   Widget build(BuildContext context) {
@@ -73,39 +73,28 @@ class _QuickSizerQuestionsViewState extends ConsumerState<QuickSizerQuestionsVie
       ElevatedButton(
         onPressed: () async {
           final repository = ref.read(dataRepositoryProvider);
+           String estimationid = '';
           try {
-            // Creazione della Story con il nome passato
             final story = await repository.createStory(widget.name);
-            // Mappatura dei valori:
-            // - Reach    -> selectedValues[0]
-            // - Complexity -> selectedValues[1]
-            // - Dimensions -> selectedValues[2]
-            // - Risk       -> selectedValues[3]
-            // - Interaction-> selectedValues[4]
-            print("storia creata :"+story.toString());
-            print("storia creata :"+story.id);
+
             final estimation = await repository.createEstimation(
               name: widget.name,
-              complexity: selectedValues[1],
-              reach: selectedValues[0],
-              dimension: selectedValues[2],
-              risk: selectedValues[3],
-              interaction: selectedValues[4],
+              complexity: selectedValues[1]+1,
+              reach: selectedValues[0]+1,
+              dimension: selectedValues[2]+1,
+              risk: selectedValues[3]+1,
+              interaction: selectedValues[4]+1,
               storyId: story.id,
             );
-
-
-            // Puoi opzionalmente navigare o mostrare un messaggio di successo
-            print("Estimation creata: ${estimation.id}");
-            print("Estimation creata sto: ${estimation.story.id}");
-            // Ad esempio, naviga alla pagina dei dettagli o torna indietro
-            context.go('/home/estimation');
+            estimationid = estimation.id;
           } catch (e) {
-            print("Errore durante la creazione dell'estimazione: $e");
+            print("Error");
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Errore durante la creazione dell'estimazione")),
+              SnackBar(content: Text("Error")),
             );
           }
+           await ref.refresh(estimationProvider(estimationid).future);
+            context.go('/home/estimation/$estimationid');
         },
         style: ElevatedButton.styleFrom(
           fixedSize: const Size(200, 20),

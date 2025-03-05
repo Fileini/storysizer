@@ -186,10 +186,10 @@ Future<void> handleEvent(KeycloakEvent event) async {
         "lastName": _keycloakProfile?.lastName ?? "Utente sconosciuto",
       };
 
-      print('Profilo utente: $userProfile');
+      //print('Profilo utente: $userProfile');
       return userProfile;
     } catch (e) {
-      print("Errore nel recupero del profilo utente: $e");
+      //print("Errore nel recupero del profilo utente: $e");
       return {
         "id": "Errore",
         "username": "Errore nel caricamento",

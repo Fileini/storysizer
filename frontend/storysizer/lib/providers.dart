@@ -1,11 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:storysizer/models/estimation.dart';
 import 'package:storysizer/services/auth_service.dart';
 import 'package:storysizer/services/data_repository.dart';
 import 'package:storysizer/services/estimation_notifier.dart';
 import 'package:storysizer/services/story_notifier.dart';
 import 'services/themeprovider.dart';
 import 'routes.dart';
+import 'package:flutter/material.dart';
+
+
+  final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
+
 
 final themeModeProvider = ChangeNotifierProvider<ThemeModeProvider>(
   (ref) => ThemeModeProvider(),
@@ -30,6 +36,16 @@ final estimationsNotifierProvider = StateNotifierProvider<EstimationsNotifier, E
   return EstimationsNotifier(repository: repository);
 });
 
+final estimationProvider = FutureProvider.family<Estimation, String>((ref, id) async {
+  final repository = ref.watch(dataRepositoryProvider);
+  // Se esiste un metodo dedicato, usalo, altrimenti filtra la lista
+  final estimations = await repository.fetchEstimations();
+  return estimations.firstWhere(
+    (estimation) => estimation.id == id,
+    orElse: () => throw Exception('Estimation not found'),
+  );
+});
+
 final dataRepositoryProvider = Provider<DataRepository>((ref) {
   final client = ref.watch(graphqlClientProvider);
   return DataRepository(client: client);
@@ -43,7 +59,7 @@ final graphqlClientProvider = Provider<GraphQLClient>((ref) {
   final authLink = AuthLink(
     getToken: () async {
       final token = await authService.getAccessToken();
-          print('Token usato per la richiesta: $token'); // Debug
+        //  print('Token usato per la richiesta: $token'); // Debug
 
       return 'Bearer $token';
     },

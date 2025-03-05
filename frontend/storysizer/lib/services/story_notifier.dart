@@ -34,21 +34,19 @@ class StoriesNotifier extends StateNotifier<StoriesState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
-
-  // Metodo per cancellare una story. Se la cancellazione va a buon fine, 
-  // rimuove la story dallo state.
-  Future<void> deleteStory(String id) async {
-    try {
-      final success = await repository.deleteStory(id);
-      if (success) {
-        final updatedStories = List<Story>.from(state.stories ?? []);
-        updatedStories.removeWhere((story) => story.id == id);
-        state = state.copyWith(stories: updatedStories);
-      }
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+Future<void> deleteStory(String id) async {
+  try {
+    final success = await repository.deleteStory(id);
+    if (success) {
+      // Crea una nuova lista per forzare la ricostruzione
+      final updatedStories = List<Story>.from(state.stories ?? []);
+      updatedStories.removeWhere((story) => story.id == id);
+      state = state.copyWith(stories: updatedStories);
     }
+  } catch (e) {
+    state = state.copyWith(error: e.toString());
   }
+}
 }
 
 

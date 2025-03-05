@@ -12,14 +12,30 @@ class HistoryView extends ConsumerStatefulWidget {
   ConsumerState<HistoryView> createState() => _HistoryViewState();
 }
 
-class _HistoryViewState extends ConsumerState<HistoryView> {
+class _HistoryViewState extends ConsumerState<HistoryView> with RouteAware {
   @override
   void initState() {
     super.initState();
-    // Carica le stories appena la view viene creata
     Future.microtask(() =>
         ref.read(estimationsNotifierProvider.notifier).loadEstimations());
   }
+ @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.read(estimationsNotifierProvider.notifier).loadEstimations();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +63,18 @@ class _HistoryViewState extends ConsumerState<HistoryView> {
                           // Per esempio, possiamo mostrare l'owner come "points"
                           points: estimation.size.toString(),
                           icon: CupertinoIcons.delete_solid,
-                          onDeleted: () {
-                            ref
+                          onDeleted: () async {
+                            await ref
                                 .read(storiesNotifierProvider.notifier)
                                 .deleteStory(estimation.story.id);
+                           await ref.read(estimationsNotifierProvider.notifier).loadEstimations();
+
+
                           },
                           onTap: () {
-                            context.go('/home/estimation');
+                          final String estimationid = estimation.id;  
+                          context.go('/home/estimation/$estimationid');
+
                           },
                         );
                       },

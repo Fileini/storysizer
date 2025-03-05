@@ -18,7 +18,8 @@ class DataRepository {
       }
     ''';
     
-    final result = await client.query(QueryOptions(document: gql(query)));
+    final result = await client.query(QueryOptions(document: gql(query),
+    fetchPolicy: FetchPolicy.networkOnly,));
     if(result.hasException) {
       throw Exception(result.exception.toString());
     }
@@ -50,7 +51,8 @@ class DataRepository {
       }
     ''';
     
-    final result = await client.query(QueryOptions(document: gql(query)));
+    final result = await client.query(QueryOptions(document: gql(query),
+    fetchPolicy: FetchPolicy.networkOnly,));
     if(result.hasException) {
       throw Exception(result.exception.toString());
     }

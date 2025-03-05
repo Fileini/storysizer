@@ -62,11 +62,11 @@ public class EstimationController {
     @PostMapping
     public Estimation createEstimation(@RequestBody Estimation estimation) {
         //maximum values
-        if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(5);} 
-        if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(5);}
-        if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(5);}
-        if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(5);}
-        if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(5);}
+        if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(1);} 
+        if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(1);}
+        if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(1);}
+        if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(1);}
+        if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(1);}
 
         estimation.setSize(estimationService.calculateSize(estimation));
 
@@ -78,11 +78,11 @@ public class EstimationController {
         estimation.setId(id);
 
          //maximum values
-         if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(5);} 
-         if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(5);}
-         if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(5);}
-         if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(5);}
-         if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(5);}
+         if (estimation.getComplexity()>5){estimation.setComplexity(5);}  if (estimation.getComplexity()<1){estimation.setComplexity(1);} 
+         if (estimation.getInteraction()>5){estimation.setInteraction(5);}if (estimation.getInteraction()<1){estimation.setInteraction(1);}
+         if (estimation.getDimensions()>5){estimation.setDimensions(5);}if (estimation.getDimensions()<1){estimation.setDimensions(1);}
+         if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(1);}
+         if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(1);}
 
          estimation.setSize(estimationService.calculateSize(estimation));
 

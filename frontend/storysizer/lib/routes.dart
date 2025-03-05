@@ -85,10 +85,10 @@ class StszRoutes {
                             view: QuickSizerQuestionsView(
                                 name: state.pathParameters['name']!)))),
                 GoRoute(
-                  path: 'estimation',
+                  path: 'estimation/:id',
                   pageBuilder: (context, state) => _animatedPage(
                     state: state,
-                    child: MenuScreen(view: EstimationView()),
+                    child: MenuScreen(view: EstimationView(id: state.pathParameters['id']!)),
                   ),
                 ),                
               ],

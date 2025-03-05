@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
-import 'package:storysizer/main.dart';
+import 'package:storysizer/providers.dart';
 import 'package:storysizer/services/auth_service.dart';
 import 'package:storysizer/services/themeprovider.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   static String routeName = 'ProfileScreen';
 
   const ProfileScreen({super.key});
@@ -19,17 +20,15 @@ class ProfileScreen extends StatefulWidget {
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isDarkMode = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final themeProvider =
-          Provider.of<ThemeModeProvider>(context, listen: false);
       setState(() {
-        _isDarkMode = themeProvider.mode == ThemeMode.light;
+        _isDarkMode = ref.read(themeModeProvider).mode == ThemeMode.light;
       });
     });
   }
@@ -38,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _isDarkMode = !value;
     });
-    Provider.of<ThemeModeProvider>(context, listen: false).changeMode(value);
+    ref.read(themeModeProvider).changeMode(value);
   }
 
   @override
