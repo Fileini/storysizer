@@ -23,13 +23,12 @@ class _QuickSizerQuestionsViewState extends ConsumerState<QuickSizerQuestionsVie
     "Interaction"
   ];
 
-  // Ignoriamo le descrizioni, oppure le lasciamo vuote
   final List<String> descriptions = [
-    "",
-    "",
-    "",
-    "",
-    ""
+    "How much do you think the technical aspects of this story fall within the scrum team’s competences?",
+    "How interconnected are the different parts of this story?",
+    "How many different parts do you think this story has?",
+    "How high do you think the probability of encountering risks with significant impact on the realisation is?",
+    "How many stakeholders are involved outside the scrum team?"
   ];
 
   final List<List<String>> labels = [
