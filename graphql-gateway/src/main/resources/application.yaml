@@ -27,8 +27,8 @@ spring:
 #        estimations: http://estimations-service.service-prod.svc.cluster.local:8081/graphql
     path: /graphql
     graphiql:
-      enabled: true
-      path: /graphiql
+      enabled: false
+#      path: /graphiql
 server:
   port: 9090
   forward-headers-strategy: native
