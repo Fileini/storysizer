@@ -3,55 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <title>GraphiQL</title>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
-    <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/graphiql/vendor/graphiql.min.css" />
     <style>
-      body {
-        height: 100%;
-        margin: 0;
-        width: 100%;
-        overflow: hidden;
-      }
-      #graphiql {
-        height: 100vh;
-      }
+      html, body { height: 100%; margin: 0; }
+      #graphiql { height: 100vh; }
     </style>
   </head>
   <body>
     <div id="graphiql">Loading...</div>
-    
-    <script>
-      var authToken = /*[[${authToken}]]*/ '';
-      console.log("Auth token:", authToken);
-      // Il fetcher userà authToken per l'header Authorization
-      function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql', {
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken ? 'Bearer ' + authToken : ''
-          },
-          body: JSON.stringify(graphQLParams),
-          credentials: 'include',
-        }).then(function (response) {
-          return response.text();
-        }).then(function (responseBody) {
-          try {
-            return JSON.parse(responseBody);
-          } catch (error) {
-            return responseBody;
-          }
-        });
-      }
-      
-      ReactDOM.render(
-        React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
-        document.getElementById('graphiql')
-      );
-    </script>
+
+    <!-- JS locali (same-origin) -->
+    <script src="/graphiql/vendor/react.production.min.js"></script>
+    <script src="/graphiql/vendor/react-dom.production.min.js"></script>
+    <script src="/graphiql/vendor/graphiql.min.js"></script>
+    <script src="/graphiql/vendor/plugin-explorer.umd.js"></script>
     
 
+    <!-- Thymeleaf inlining per inject del token -->
+    <script th:inline="javascript">
+      var authToken = /*[[${authToken}]]*/ '';
+      console.log("Auth token:", authToken);
+
+      function graphQLFetcher(graphQLParams) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+
+        return fetch('/graphql', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(graphQLParams),
+          credentials: 'include', // mantiene la sessione (se usi anche cookie)
+        }).then(r => r.text()).then(t => {
+          try { return JSON.parse(t); } catch { return t; }
+        });
+      }
+
+      const root = document.getElementById('graphiql');
+
+      ReactDOM.createRoot(root).render(
+        React.createElement(GraphiQL, { fetcher: graphQLFetcher })
+      );
+
+   
+      const explorer = GraphiQLPluginExplorer.explorerPlugin({ query: '' });
+      ReactDOM.createRoot(root).render(
+        React.createElement(GraphiQL, { fetcher: graphQLFetcher, plugins: [explorer] })
+      );
+      
+    </script>
   </body>
 </html>
