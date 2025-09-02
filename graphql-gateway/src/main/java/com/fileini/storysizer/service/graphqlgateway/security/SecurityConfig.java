@@ -57,9 +57,9 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-    String jwkSetUri = "https://keycloak.public.cluster.local.com/realms/storysizer/protocol/openid-connect/certs";
-    return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
-  }
+    // @Bean
+    // public JwtDecoder jwtDecoder() {
+    // String jwkSetUri = "https://keycloak.public.cluster.local.com/realms/storysizer/protocol/openid-connect/certs";
+    // return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+  //}
 }
