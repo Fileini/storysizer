@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Escludo dalla sicurezza altri endpoint statici o di login
                 .requestMatchers("/custom-login", "/error", "/css/**", "/js/**", "/vendor/**").permitAll()
+                .requestMatchers("/graphiql/vendor/**").permitAll() 
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
