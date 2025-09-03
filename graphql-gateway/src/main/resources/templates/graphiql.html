@@ -1,56 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <title>GraphiQL</title>
-    <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/graphiql/vendor/graphiql.min.css" />
-    <style>
-      html, body { height: 100%; margin: 0; }
-      #graphiql { height: 100vh; }
-    </style>
-  </head>
-  <body>
-    <div id="graphiql">Loadings...</div>
 
-    <!-- JS locali (same-origin) -->
-    <script src="/graphiql/vendor/react.production.min.js"></script>
-    <script src="/graphiql/vendor/react-dom.production.min.js"></script>
-    <script src="/graphiql/vendor/graphiql.min.js"></script>
-    <script src="/graphiql/vendor/plugin-explorer.umd.js"></script>
-    
+    <link rel="stylesheet" href="https://esm.sh/graphiql@5.2.0/style.css">
+<link rel="stylesheet" href="https://esm.sh/@graphiql/plugin-explorer@5.1.1/style.css">
+<div id="app" style="height:100vh"></div>
 
-    <!-- Thymeleaf inlining per inject del token -->
-    <script th:inline="javascript">
-      var authToken = /*[[${authToken}]]*/ '';
-      console.log("Auth token:", authToken);
+<script type="module">
+  import React from "https://esm.sh/react@18";
+  import { createRoot } from "https://esm.sh/react-dom@18/client";
+  import { GraphiQL, createGraphiQLFetcher } from "https://esm.sh/graphiql@5.2.0";
+  import { explorerPlugin } from "https://esm.sh/@graphiql/plugin-explorer@5.1.1";
 
-      function graphQLFetcher(graphQLParams) {
-        const headers = { 'Content-Type': 'application/json' };
-        if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+  const fetcher = createGraphiQLFetcher({ url: "/graphql" });
+  const root = createRoot(document.getElementById("app"));
+  root.render(
+    React.createElement(GraphiQL, {
+      fetcher,
+      plugins: [explorerPlugin()],
+      defaultEditorToolsVisibility: true,
+    })
+  );
+</script>
 
-        return fetch('/graphql', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(graphQLParams),
-          credentials: 'include', // mantiene la sessione (se usi anche cookie)
-        }).then(r => r.text()).then(t => {
-          try { return JSON.parse(t); } catch { return t; }
-        });
-      }
-
-      const root = document.getElementById('graphiql');
-
-      ReactDOM.createRoot(root).render(
-        React.createElement(GraphiQL, { fetcher: graphQLFetcher })
-      );
-
-   
-      const explorer = GraphiQLPluginExplorer.explorerPlugin({ query: '' });
-      ReactDOM.createRoot(root).render(
-        React.createElement(GraphiQL, { fetcher: graphQLFetcher, plugins: [explorer] })
-      );
-      
-    </script>
-  </body>
+</body>
 </html>
