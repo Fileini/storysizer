@@ -6,11 +6,20 @@ metadata:
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
+    resourceNames: ["gateway-service"]     # opzionale ma meglio restringere
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
   - apiGroups: [""]
-    resources: ["services"]
+    resources: ["services", "secrets"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Regola per leggere/aggiornare SOLO quel secret
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["keycloak-truststore"]
-    verbs: ["get", "create", "update", "patch", "delete"]   # aggiunto delete se vuoi continuare a fare 'delete'
+    verbs: ["get", "update", "patch", "delete"]
+
+  # Regola separata per CREATE (non può avere resourceNames)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
