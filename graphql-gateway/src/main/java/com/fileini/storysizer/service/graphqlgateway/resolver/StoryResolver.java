@@ -1,16 +1,15 @@
 package com.fileini.storysizer.service.graphqlgateway.resolver;
 
+import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -18,120 +17,91 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
-public class StoryResolver {
-
+@Component
+public class StoryResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
-    private final String baseUrlestimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
+    private final String baseUrlStory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
+    private final String baseUrlEstimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
 
-
-    @QueryMapping
+    /** Query: stories */
     public List<Map<String, Object>> stories() {
-      
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String owner = "";
-        if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getClaimAsString("preferred_username");
-        } else if (authentication.getPrincipal() instanceof OidcUser) {
-            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-        } else {
-            return null;
-        }
-               
-    
-            // Costruisci l'URL con il parametro di query per il filtraggio
-        String url = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
+        String owner = currentOwner();
+        if (owner == null) return null;
+
+        String url = UriComponentsBuilder.fromUriString(baseUrlStory + "/owner")
                 .pathSegment(owner)
                 .toUriString();
 
-        // Effettua la chiamata al microservizio story-service
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         );
-
         return response.getBody();
     }
-    
 
-    @MutationMapping
-    public Map<String, Object> createStory(@Argument String name) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-         String owner = "";
-         if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getClaimAsString("preferred_username");
-        } else if (authentication.getPrincipal() instanceof OidcUser) {
-            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-        } else {
-            return null;
-        }
-                
+    /** Mutation: createStory */
+    public Map<String, Object> createStory(String name) {
+        String owner = currentOwner();
+        if (owner == null) return null;
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", name);
         payload.put("owner", owner);
-        Map<String, Object> createdStory = restTemplate.postForObject(baseUrlstory, payload, Map.class);
 
-        return createdStory;
+        return restTemplate.postForObject(baseUrlStory, payload, Map.class);
     }
 
-    
-    @MutationMapping
-    public Boolean deleteStory(@Argument String id) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String owner = "";
-    if (authentication.getPrincipal() instanceof Jwt) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        owner = jwt.getClaimAsString("preferred_username");
-    } else if (authentication.getPrincipal() instanceof OidcUser) {
-        owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-    } else {
-        return null;
-    }
-    
-    String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
-    .pathSegment(owner)
-    .queryParam("id", id)
-    .toUriString();
+    /** Mutation: deleteStory */
+    public Boolean deleteStory(String id) {
+        String owner = currentOwner();
+        if (owner == null) return null;
 
-    ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+        String urlGet = UriComponentsBuilder.fromUriString(baseUrlStory + "/owner")
+                .pathSegment(owner)
+                .queryParam("id", id)
+                .toUriString();
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 urlGet,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         );
 
+        List<Map<String, Object>> story = response.getBody();
+        if (story == null || story.isEmpty()) return false;
 
-    List<Map<String, Object>> story = response.getBody();
-    
-    if (story.isEmpty()) {
-        return false;
+        // verifica ownership
+        if (!owner.equals(story.get(0).get("owner"))) return false;
+
+        // cascade delete Estimation
+        String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlEstimation + "/story")
+                .pathSegment(id)
+                .queryParam("owner", owner)
+                .toUriString();
+        restTemplate.delete(urlDeleteEstimations);
+
+        // delete story
+        String urlDelete = baseUrlStory + "/" + id;
+        restTemplate.delete(urlDelete);
+
+        return true;
     }
-    
-    // Verifica che la story appartenga all'utente autenticato
-    if (!owner.equals(story.get(0).get("owner"))) {
-        return false;
-    }
-    
-    
-    // Cascade delete Estimation
-    String urlDeleteEstimations = UriComponentsBuilder.fromUriString(baseUrlestimation + "/story")
-    .pathSegment(id)
-    .queryParam("owner", owner)
-    .toUriString();
-    restTemplate.delete(urlDeleteEstimations);
 
-    //delete story
-    String urlDelete = baseUrlstory +'/'+ id;
-    restTemplate.delete(urlDelete);
+    /** Helper: recupera l'owner dall'Authentication */
+    private String currentOwner() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) return null;
 
-
-    return true;
-
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Jwt jwt) {
+            return jwt.getClaimAsString("preferred_username");
+        } else if (principal instanceof OidcUser oidc) {
+            return oidc.getPreferredUsername();
+        }
+        return null;
     }
 }

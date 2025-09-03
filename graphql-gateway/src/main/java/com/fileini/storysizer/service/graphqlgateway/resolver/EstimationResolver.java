@@ -1,17 +1,16 @@
 package com.fileini.storysizer.service.graphqlgateway.resolver;
 
+import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import com.coxautodev.graphql.tools.GraphQLResolver;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -19,34 +18,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
-public class EstimationResolver {
+@Component
+public class EstimationResolver
+        implements GraphQLQueryResolver, GraphQLMutationResolver, GraphQLResolver<Map<String, Object>> {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrlestimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
-    private final String baseUrlstory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
+    private final String baseUrlEstimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
+    private final String baseUrlStory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
 
-
-    @QueryMapping
+    /** Query: estimations */
     public List<Map<String, Object>> estimations() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String owner = "";
-        if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getClaimAsString("preferred_username");
-        } else if (authentication.getPrincipal() instanceof OidcUser) {
-            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-        } else {
-            return null;
-        }
-               
-    
-            // Costruisci l'URL con il parametro di query per il filtraggio
-        String url = UriComponentsBuilder.fromUriString(baseUrlestimation + "/owner")
+        String owner = currentOwner();
+        if (owner == null) return null;
+
+        String url = UriComponentsBuilder.fromUriString(baseUrlEstimation + "/owner")
                 .pathSegment(owner)
                 .toUriString();
 
-        // Effettua la chiamata al microservizio story-service
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -54,70 +42,50 @@ public class EstimationResolver {
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         );
         return response.getBody();
-
     }
 
+    /** Field resolver: Estimation.story (ex @SchemaMapping) */
+    public Map<String, Object> story(Map<String, Object> estimation) {
+        Integer storyId = estimation == null ? null : (Integer) estimation.get("storyId");
+        if (storyId == null) return null;
 
-    @SchemaMapping(typeName = "Estimation", field = "story")
-    public Map<String, Object> getStory(Map<String, Object> estimation) {
-        Integer storyId = (Integer) estimation.get("storyId");
-
-        if (storyId == null) {
-            return null;
-        }
-
-        String url = UriComponentsBuilder.fromUriString("http://story-service.service-prod.svc.cluster.local:8080/stories/" + storyId)
+        String url = UriComponentsBuilder.fromUriString(baseUrlStory + "/" + storyId)
                 .toUriString();
 
         return restTemplate.getForObject(url, Map.class);
     }
 
-
-    @MutationMapping   
+    /** Mutation: createEstimation */
     public Map<String, Object> createEstimation(
-        @Argument String name, 
-        @Argument Integer complexity,
-        @Argument Integer reach,
-        @Argument Integer dimension,
-        @Argument Integer risk,
-        @Argument Integer interaction, 
-        @Argument String storyId ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-         String owner = "";
-         if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            owner = jwt.getClaimAsString("preferred_username");
-        } else if (authentication.getPrincipal() instanceof OidcUser) {
-            owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-        } else {
-            return null;
-        }
-        
-            
-        String urlGet = UriComponentsBuilder.fromUriString(baseUrlstory + "/owner")
-        .pathSegment(owner)
-        .queryParam("id", storyId)
-        .toUriString();
+            String name,
+            Integer complexity,
+            Integer reach,
+            Integer dimension,
+            Integer risk,
+            Integer interaction,
+            String storyId
+    ) {
+        String owner = currentOwner();
+        if (owner == null) return null;
+
+        String urlGet = UriComponentsBuilder.fromUriString(baseUrlStory + "/owner")
+                .pathSegment(owner)
+                .queryParam("id", storyId)
+                .toUriString();
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                    urlGet,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}
-            );
-
+                urlGet,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        );
 
         List<Map<String, Object>> story = response.getBody();
-        
-        if (story.isEmpty()) {
-            return null;
-        }
-        
-        // Verifica che la story appartenga all'utente autenticato
-        if (!owner.equals(story.get(0).get("owner"))) {
-            return null;
-        }
-                
+        if (story == null || story.isEmpty()) return null;
+
+        // verifica ownership
+        if (!owner.equals(story.get(0).get("owner"))) return null;
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", name);
         payload.put("owner", story.get(0).get("owner"));
@@ -128,57 +96,47 @@ public class EstimationResolver {
         payload.put("risk", risk);
         payload.put("interaction", interaction);
 
-        Map<String, Object> createdStory = restTemplate.postForObject(baseUrlestimation, payload, Map.class);
-
-        return createdStory;
+        return restTemplate.postForObject(baseUrlEstimation, payload, Map.class);
     }
 
-    @MutationMapping
-    public Boolean deleteEstimation(@Argument String id) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String owner = "";
-    if (authentication.getPrincipal() instanceof Jwt) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        owner = jwt.getClaimAsString("preferred_username");
-    } else if (authentication.getPrincipal() instanceof OidcUser) {
-        owner = ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
-    } else {
-        return null;
-    }
-               
-    
-    String urlGet = UriComponentsBuilder.fromUriString(baseUrlestimation + "/owner")
-    .pathSegment(owner)
-    .queryParam("id", id)
-    .toUriString();
+    /** Mutation: deleteEstimation */
+    public Boolean deleteEstimation(String id) {
+        String owner = currentOwner();
+        if (owner == null) return null;
 
-    ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+        String urlGet = UriComponentsBuilder.fromUriString(baseUrlEstimation + "/owner")
+                .pathSegment(owner)
+                .queryParam("id", id)
+                .toUriString();
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 urlGet,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         );
 
+        List<Map<String, Object>> estimation = response.getBody();
+        if (estimation == null || estimation.isEmpty()) return false;
 
-    List<Map<String, Object>> estimation = response.getBody();
-    
-    if (estimation.isEmpty()) {
-        return false;
-    }
-    
-    // Verifica che la story appartenga all'utente autenticato
-    if (!owner.equals(estimation.get(0).get("owner"))) {
-        return false;
-    }
-    
-    // Se la verifica ha successo, inoltra la richiesta di cancellazione al microservizio
-    String urlDelete = baseUrlestimation +'/'+ id;
-    restTemplate.delete(urlDelete);
+        if (!owner.equals(estimation.get(0).get("owner"))) return false;
 
-
-    return true;
-
+        String urlDelete = baseUrlEstimation + "/" + id;
+        restTemplate.delete(urlDelete);
+        return true;
     }
 
+    /** Helper: recupera l'owner dall'Authentication */
+    private String currentOwner() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) return null;
 
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Jwt jwt) {
+            return jwt.getClaimAsString("preferred_username");
+        } else if (principal instanceof OidcUser oidc) {
+            return oidc.getPreferredUsername();
+        }
+        return null;
+    }
 }
