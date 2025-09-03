@@ -28,7 +28,7 @@ spring:
     path: /graphql
     graphiql:
       enabled: true
-      path: /graphiql-ui
+      path: /graphiql
 server:
   port: 9090
   forward-headers-strategy: native
