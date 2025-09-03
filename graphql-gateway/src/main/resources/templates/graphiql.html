@@ -4,26 +4,35 @@
     <meta charset="utf-8" />
     <title>GraphiQL</title>
 
-    <link rel="stylesheet" href="https://esm.sh/graphiql@5.2.0/style.css">
-<link rel="stylesheet" href="https://esm.sh/@graphiql/plugin-explorer@5.1.1/style.css">
-<div id="app" style="height:100vh"></div>
+    <!-- CSS: usa i path corretti -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphiql@5.2.0/graphiql.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@5.1.1/dist/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html, body, #graphiql { height: 100%; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="graphiql">Loading…</div>
 
-<script type="module">
-  import React from "https://esm.sh/react@18";
-  import { createRoot } from "https://esm.sh/react-dom@18/client";
-  import { GraphiQL, createGraphiQLFetcher } from "https://esm.sh/graphiql@5.2.0";
-  import { explorerPlugin } from "https://esm.sh/@graphiql/plugin-explorer@5.1.1";
+    <script type="module">
+      import React from "https://esm.sh/react@18";
+      import ReactDOM from "https://esm.sh/react-dom@18/client";
+      import { GraphiQL } from "https://esm.sh/graphiql@5.2.0";
+      import { createGraphiQLFetcher } from "https://esm.sh/@graphiql/toolkit@0.21.0";
+      import { ExplorerPlugin } from "https://esm.sh/@graphiql/plugin-explorer@5.1.1";
 
-  const fetcher = createGraphiQLFetcher({ url: "/graphql" });
-  const root = createRoot(document.getElementById("app"));
-  root.render(
-    React.createElement(GraphiQL, {
-      fetcher,
-      plugins: [explorerPlugin()],
-      defaultEditorToolsVisibility: true,
-    })
-  );
-</script>
+      const fetcher = createGraphiQLFetcher({ url: "/graphql" }); // adegua se il path è diverso
+      const explorer = ExplorerPlugin();
 
-</body>
+      const root = ReactDOM.createRoot(document.getElementById("graphiql"));
+      root.render(
+        React.createElement(GraphiQL, {
+          fetcher,
+          defaultEditorToolsVisibility: true,
+          plugins: [explorer]
+        })
+      );
+    </script>
+  </body>
 </html>
