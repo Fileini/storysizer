@@ -19,25 +19,24 @@
 
   <properties>
     <java.version>17</java.version>
-    <!-- Versione Kickstart compatibile con Spring Boot 3 / Jakarta -->
     <graphql-kickstart.version>15.1.0</graphql-kickstart.version>
+    <graphql-java-tools.version>14.0.1</graphql-java-tools.version>
   </properties>
 
   <dependencies>
-
     <!-- Web / MVC -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- Thymeleaf (login custom ecc.) -->
+    <!-- Thymeleaf -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <!-- OAuth2 Client (Keycloak login) -->
+    <!-- OAuth2 Client (login Keycloak) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-client</artifactId>
@@ -49,18 +48,18 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
 
-    <!-- GraphQL Kickstart (servlet + GraphiQL/Playground/Altair asset locali) -->
+    <!-- GraphQL Kickstart -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-spring-boot-starter</artifactId>
       <version>${graphql-kickstart.version}</version>
     </dependency>
 
-    <!-- Schema-first (.graphqls) e resolver -->
+    <!-- Schema-first (.graphqls) & resolvers -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-java-tools</artifactId>
-      <version>${graphql-kickstart.version}</version>
+      <version>${graphql-java-tools.version}</version>
     </dependency>
 
     <!-- OpenFeign -->
@@ -77,13 +76,12 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Solo test utils Spring GraphQL (se ti servono; può rimanere) -->
+    <!-- (opzionale) spring-graphql-test può restare per i test -->
     <dependency>
       <groupId>org.springframework.graphql</groupId>
       <artifactId>spring-graphql-test</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -94,5 +92,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
