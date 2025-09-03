@@ -28,6 +28,8 @@ spring:
     path: /graphql
     graphiql:
       enabled: true
+      cdn:
+        enabled: false 
       path: /graphiql
 server:
   port: 9090
