@@ -30,6 +30,9 @@ spring:
       enabled: true
       cdn:
         enabled: false 
+      props:
+        variables:
+          editorTheme: "dracula"
       path: /graphiql
 server:
   port: 9090
