@@ -11,3 +11,8 @@ rules:
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "list", "watch", "create", "update","patch", "delete"]
+  # per segreto del truststore
+- apiGroups: [""]
+   resources: ["secrets"]
+   resourceNames: ["keycloak-truststore"]   # limita SOLO a quel secret
+   verbs: ["get", "create", "update", "patch"]
