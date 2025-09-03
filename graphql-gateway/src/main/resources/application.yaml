@@ -20,27 +20,30 @@ spring:
         jwt:
           issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
 
-  graphql:
-#    federation:
-#      services:
-#        stories: http://story-service.service-prod.svc.cluster.local:8080/graphql
-#        estimations: http://estimations-service.service-prod.svc.cluster.local:8081/graphql
-    path: /graphql
-    graphiql:
-      enabled: true
-      cdn:
-        enabled: false 
-      props:
-        variables:
-          editorTheme: "dracula"
-      path: /graphiql
+# --- CONFIGURAZIONE KICKSTART ---
+graphql:
+  servlet:
+    enabled: true
+    mapping: /graphql
+    cors-enabled: false          # stessa origin: CORS non necessario
+  playground:
+    enabled: false               # opzionale: spegne Playground
+  graphiql:
+    enabled: true
+    mapping: /graphiql
+    endpoint:
+      graphql: /graphql          # a quale endpoint puntare
+    cdn:
+      enabled: false             # asset locali dal JAR (niente unpkg)
+    props:
+      variables:
+        editorTheme: "dracula"   # opzionale, tema editor
+
 server:
   port: 9090
   forward-headers-strategy: native
-#  error:
-#    include-stacktrace: always
+
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
-
