@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class EstimationResolver
-        implements GraphQLQueryResolver, GraphQLMutationResolver, GraphQLResolver<Map<String, Object>> {
+public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutationResolver  {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrlEstimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
