@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: cloudflared
+data:
+  config.yaml: |
+    tunnel: 2c88d1dc-b80f-4e56-ab73-cd13fe637bd1
+    credentials-file: /etc/cloudflared/creds/CREDENTIALS.json
+    ingress:
+      - hostname: app.storysizer.org
+        service: http://traefik-public.ingress.svc.cluster.local:80
+      - service: http_status:404
