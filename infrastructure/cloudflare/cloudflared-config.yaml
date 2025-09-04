@@ -9,5 +9,6 @@ data:
     credentials-file: /etc/cloudflared/creds/CREDENTIALS.json
     ingress:
       - hostname: app.storysizer.org
-        service: http://traefik-public.ingress.svc.cluster.local:80
+        service: https://traefik-public.ingress.svc.cluster.local:443
+        originServerName: app.storysizer.org
       - service: http_status:404
