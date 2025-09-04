@@ -55,6 +55,16 @@ spec:
             name: storysizer-web
             port:
               number: 80
+  - host: app.storysizer.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: storysizer-web
+                port:
+                  number: 80
   tls:
   - hosts:
     - storysizer.public.cluster.local.com
