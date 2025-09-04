@@ -5,21 +5,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Map;
+import com.fileini.storysizer.service.graphqlgateway.model.Estimation;
 
 @Component
-public class EstimationFieldResolver implements GraphQLResolver<Map<String, Object>> {
+public class EstimationFieldResolver implements GraphQLResolver<Estimation> {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrlStory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
 
-    // Field resolver per: Estimation.story : Story
-    public Map<String, Object> story(Map<String, Object> estimation) {
-        if (estimation == null) return null;
+    // Risolve: Estimation.story : Story
+    public Story story(Estimation estimation) {
         Object storyId = estimation.get("storyId");
         if (storyId == null) return null;
 
-        String url = UriComponentsBuilder.fromUriString(baseUrlStory + "/" + storyId).toUriString();
-        return restTemplate.getForObject(url, Map.class);
+        String url = UriComponentsBuilder
+                .fromUriString(baseUrlStory + "/" + String.valueOf(storyId))
+                .toUriString();
+
+        return restTemplate.getForObject(url, Story.class);
     }
 }
