@@ -1,0 +1,27 @@
+ingress:
+  # lasci l'hostname interno com'è (keycloak.public.cluster.local.com)
+  # aggiungi un host pubblico oltre a quello interno:
+  extraHosts:
+    - name: auth.storysizer.org
+      path: /            # opzionale, default "/"
+
+  # TLS: tieni il blocco che già hai per il wildcard interno
+  #      e AGGIUNGI un blocco per l'host pubblico con il secret Cloudflare Origin
+  extraTls:
+    - hosts:
+        - keycloak.public.cluster.local.com
+      secretName: wildcard-public-cluster-tls
+    - hosts:
+        - auth.storysizer.org
+      secretName: keycloak-tls
+
+# Env aggiuntive per Keycloak (Bitnami supporta extraEnvVars)
+extraEnvVars:
+  - name: KC_HOSTNAME
+    value: auth.storysizer.org
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "true"
+  - name: KC_PROXY
+    value: "edge"
+  - name: KC_HTTP_ENABLED
+    value: "true"
