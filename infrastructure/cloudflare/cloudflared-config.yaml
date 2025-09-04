@@ -18,4 +18,8 @@ data:
         originRequest:
           originServerName: app.storysizer.org   # << usa SNI corretto
           # (opzionale) httpHostHeader: app.storysizer.org
+      - hostname: auth.storysizer.org
+        service: https://traefik-public.ingress.svc.cluster.local:443
+        originRequest:
+          originServerName: auth.storysizer.org
       - service: http_status:404
