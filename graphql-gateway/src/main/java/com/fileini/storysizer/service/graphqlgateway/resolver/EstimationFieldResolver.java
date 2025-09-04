@@ -13,7 +13,7 @@ public class EstimationFieldResolver implements GraphQLResolver<Estimation> {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrlStory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
 
-    // matcha il campo GraphQL: Estimation.story : Story!
+    // risolve il campo GraphQL: Estimation.story : Story
     public Story story(Estimation estimation) {
         Object storyId = estimation.get("storyId");
         if (storyId == null) return null;
