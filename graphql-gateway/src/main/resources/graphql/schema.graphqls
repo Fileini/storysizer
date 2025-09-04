@@ -1,9 +1,5 @@
 directive @key(fields: String!) on OBJECT | INTERFACE
 
-type Query {
-  _empty: String
-}
-
 type Mutation {
   createStory(name: String!): Story
   createEstimation(name: String!, complexity: Int!,reach: Int!,dimension: Int!,risk: Int!, interaction: Int! ,storyId: String!): Estimation
