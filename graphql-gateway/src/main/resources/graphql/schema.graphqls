@@ -1,8 +1,21 @@
 directive @key(fields: String!) on OBJECT | INTERFACE
 
+type Query {
+  stories: [Story]
+  estimations: [Estimation]
+}
+
 type Mutation {
   createStory(name: String!): Story
-  createEstimation(name: String!, complexity: Int!,reach: Int!,dimension: Int!,risk: Int!, interaction: Int! ,storyId: String!): Estimation
+  createEstimation(
+    name: String!,
+    complexity: Int!,
+    reach: Int!,
+    dimension: Int!,
+    risk: Int!,
+    interaction: Int!,
+    storyId: String!
+  ): Estimation
   deleteStory(id: ID!): Boolean
   deleteEstimation(id: ID!): Boolean
 }
@@ -23,9 +36,4 @@ type Estimation @key(fields: "id") {
   risk: Int!
   interaction: Int!
   size: Int
-}
-
-extend type Query {
-  stories: [Story]
-  estimations: [Estimation]
 }
