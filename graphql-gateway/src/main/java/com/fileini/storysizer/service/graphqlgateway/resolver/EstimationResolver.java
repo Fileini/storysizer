@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fileini.storysizer.service.graphqlgateway.model.Estimation;
+
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 
@@ -85,7 +88,7 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
         payload.put("risk", risk);
         payload.put("interaction", interaction);
 
-        return restTemplate.postForObject(baseUrlEstimation, payload, Map.class);
+        return restTemplate.postForObject(baseUrlEstimation, payload, Estimation.class);
     }
 
     /** Mutation: deleteEstimation */

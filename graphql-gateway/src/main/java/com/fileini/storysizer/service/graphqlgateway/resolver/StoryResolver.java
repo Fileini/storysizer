@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fileini.storysizer.service.graphqlgateway.model.Story;
+
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 
@@ -26,25 +29,21 @@ public class StoryResolver implements GraphQLQueryResolver, GraphQLMutationResol
     private final String baseUrlEstimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
 
     /** Query: stories */
-    public List<Map<String, Object>> stories() {
+    public List<Story> stories() {
         String owner = currentOwner();
         if (owner == null) return null;
 
         String url = UriComponentsBuilder.fromUriString(baseUrlStory + "/owner")
-                .pathSegment(owner)
-                .toUriString();
+                .pathSegment(owner).toUriString();
 
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        ResponseEntity<List<Story>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Story>>() {}
         );
         return response.getBody();
     }
 
     /** Mutation: createStory */
-    public Map<String, Object> createStory(String name) {
+    public Story createStory(String name) {
         String owner = currentOwner();
         if (owner == null) return null;
 
@@ -52,7 +51,7 @@ public class StoryResolver implements GraphQLQueryResolver, GraphQLMutationResol
         payload.put("name", name);
         payload.put("owner", owner);
 
-        return restTemplate.postForObject(baseUrlStory, payload, Map.class);
+        return restTemplate.postForObject(baseUrlStory, payload, Story.class);
     }
 
     /** Mutation: deleteStory */
