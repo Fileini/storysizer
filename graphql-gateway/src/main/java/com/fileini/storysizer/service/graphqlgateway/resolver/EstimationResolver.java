@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.kickstart.tools.GraphQLQueryResolver;
-import graphql.kickstart.tools.GraphQLResolver;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,17 +43,7 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
         return response.getBody();
     }
 
-    /** Field resolver: Estimation.story (ex @SchemaMapping) */
-    public Map<String, Object> story(Map<String, Object> estimation) {
-        Integer storyId = estimation == null ? null : (Integer) estimation.get("storyId");
-        if (storyId == null) return null;
-
-        String url = UriComponentsBuilder.fromUriString(baseUrlStory + "/" + storyId)
-                .toUriString();
-
-        return restTemplate.getForObject(url, Map.class);
-    }
-
+    
     /** Mutation: createEstimation */
     public Map<String, Object> createEstimation(
             String name,
