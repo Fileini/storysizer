@@ -1,6 +1,8 @@
 package com.fileini.storysizer.service.graphqlgateway.resolver;
 
-
+import com.fileini.storysizer.service.graphqlgateway.model.Estimation;
+import graphql.kickstart.tools.GraphQLMutationResolver;
+import graphql.kickstart.tools.GraphQLQueryResolver;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -12,24 +14,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fileini.storysizer.service.graphqlgateway.model.Estimation;
-
-import graphql.kickstart.tools.GraphQLMutationResolver;
-import graphql.kickstart.tools.GraphQLQueryResolver;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutationResolver  {
+public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrlEstimation = "http://estimation-service.service-prod.svc.cluster.local:8080/estimations";
     private final String baseUrlStory = "http://story-service.service-prod.svc.cluster.local:8080/stories";
 
     /** Query: estimations */
-    public List<Map<String, Object>> estimations() {
+    public List<Estimation> estimations() {
         String owner = currentOwner();
         if (owner == null) return null;
 
@@ -37,18 +34,17 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
                 .pathSegment(owner)
                 .toUriString();
 
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+        ResponseEntity<List<Estimation>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+                new ParameterizedTypeReference<List<Estimation>>() {}
         );
         return response.getBody();
     }
 
-    
     /** Mutation: createEstimation */
-    public Map<String, Object> createEstimation(
+    public Estimation createEstimation(
             String name,
             Integer complexity,
             Integer reach,
