@@ -19,25 +19,19 @@
 
   <properties>
     <java.version>17</java.version>
+    <graphql-java.version>22.3</graphql-java.version>
+    <kickstart.starter.version>15.1.0</kickstart.starter.version>
+    <kickstart.tools.version>14.0.1</kickstart.tools.version>
+    <spring-cloud.version>2024.0.0</spring-cloud.version>
   </properties>
 
-  <!-- Allineiamo versioni GraphQL Kickstart e Spring Cloud -->
   <dependencyManagement>
     <dependencies>
-      <!-- BOM GraphQL Kickstart 15.1.0 (porta graphql-java 22.x e tools compatibili) -->
-      <dependency>
-        <groupId>com.graphql-java-kickstart</groupId>
-        <artifactId>graphql-spring-boot-dependencies</artifactId>
-        <version>15.1.0</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!-- BOM Spring Cloud compatibile con Spring Boot 3.4.x -->
+      <!-- Allinea Spring Cloud (per OpenFeign) a Boot 3.4.x -->
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
-        <version>2024.0.0</version>
+        <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -51,7 +45,7 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- Thymeleaf (se usato per pagine/login ecc.) -->
+    <!-- Thymeleaf (se lo usi) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -69,25 +63,34 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
 
-    <!-- GraphQL Kickstart (servlet + autoconfig) -->
+    <!-- GraphQL Kickstart starter (escludo tools vecchio) -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-spring-boot-starter</artifactId>
+      <version>${kickstart.starter.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.graphql-java-kickstart</groupId>
+          <artifactId>graphql-java-tools</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
-    <!-- Schema-first + resolvers -->
+    <!-- GraphQL Java Tools (pin compatibile con graphql-java 22.x) -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-java-tools</artifactId>
+      <version>${kickstart.tools.version}</version>
     </dependency>
 
-    <!-- (opzionale) forza la presenza esplicita di graphql-java alla versione della BOM (22.x) -->
+    <!-- graphql-java esplicito (22.x) -->
     <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
+      <version>${graphql-java.version}</version>
     </dependency>
 
-    <!-- OpenFeign (se lo usi; altrimenti puoi rimuoverlo) -->
+    <!-- OpenFeign -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -100,7 +103,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Utility test per GraphQL (non porta l'autoconfig runtime) -->
+    <!-- Test utilities per GraphQL (solo test scope) -->
     <dependency>
       <groupId>org.springframework.graphql</groupId>
       <artifactId>spring-graphql-test</artifactId>
@@ -110,7 +113,7 @@
 
   <build>
     <plugins>
-      <!-- Parametri di compilazione (nome parametri per GraphQL Tools) -->
+      <!-- Conserva i nomi dei parametri (GraphQL Tools match by name) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
