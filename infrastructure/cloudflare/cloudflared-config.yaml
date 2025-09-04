@@ -7,8 +7,15 @@ data:
   config.yaml: |
     tunnel: 2c88d1dc-b80f-4e56-ab73-cd13fe637bd1
     credentials-file: /etc/cloudflared/creds/CREDENTIALS.json
+
+    # (opzionale) default per tutte le regole:
+    # originRequest:
+    #   originServerName: app.storysizer.org
+
     ingress:
       - hostname: app.storysizer.org
         service: https://traefik-public.ingress.svc.cluster.local:443
-        originServerName: app.storysizer.org
+        originRequest:
+          originServerName: app.storysizer.org   # << usa SNI corretto
+          # (opzionale) httpHostHeader: app.storysizer.org
       - service: http_status:404
