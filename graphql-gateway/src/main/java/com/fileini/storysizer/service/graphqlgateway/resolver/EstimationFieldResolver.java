@@ -6,6 +6,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fileini.storysizer.service.graphqlgateway.model.Estimation;
+import com.fileini.storysizer.service.graphqlgateway.model.Story;
 
 @Component
 public class EstimationFieldResolver implements GraphQLResolver<Estimation> {
