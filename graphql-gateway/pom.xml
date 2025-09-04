@@ -15,13 +15,34 @@
   <artifactId>graphql-gateway</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>graphql-gateway</name>
-  <description>Demo project for Spring Boot</description>
+  <description>StorySizer GraphQL Gateway</description>
 
   <properties>
     <java.version>17</java.version>
-    <graphql-kickstart.version>15.1.0</graphql-kickstart.version>
-    <graphql-java-tools.version>14.0.1</graphql-java-tools.version>
   </properties>
+
+  <!-- Allineiamo versioni GraphQL Kickstart e Spring Cloud -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- BOM GraphQL Kickstart 15.1.0 (porta graphql-java 22.x e tools compatibili) -->
+      <dependency>
+        <groupId>com.graphql-java-kickstart</groupId>
+        <artifactId>graphql-spring-boot-dependencies</artifactId>
+        <version>15.1.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- BOM Spring Cloud compatibile con Spring Boot 3.4.x -->
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>2024.0.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Web / MVC -->
@@ -30,13 +51,13 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- Thymeleaf -->
+    <!-- Thymeleaf (se usato per pagine/login ecc.) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <!-- OAuth2 Client (login Keycloak) -->
+    <!-- OAuth2 Client (Keycloak login) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-client</artifactId>
@@ -48,25 +69,28 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
 
-    <!-- GraphQL Kickstart -->
+    <!-- GraphQL Kickstart (servlet + autoconfig) -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-spring-boot-starter</artifactId>
-      <version>${graphql-kickstart.version}</version>
     </dependency>
 
-    <!-- Schema-first (.graphqls) & resolvers -->
+    <!-- Schema-first + resolvers -->
     <dependency>
       <groupId>com.graphql-java-kickstart</groupId>
       <artifactId>graphql-java-tools</artifactId>
-      <version>${graphql-java-tools.version}</version>
     </dependency>
 
-    <!-- OpenFeign -->
+    <!-- (opzionale) forza la presenza esplicita di graphql-java alla versione della BOM (22.x) -->
+    <dependency>
+      <groupId>com.graphql-java</groupId>
+      <artifactId>graphql-java</artifactId>
+    </dependency>
+
+    <!-- OpenFeign (se lo usi; altrimenti puoi rimuoverlo) -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-openfeign</artifactId>
-      <version>3.1.4</version>
     </dependency>
 
     <!-- Test -->
@@ -76,7 +100,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- (opzionale) spring-graphql-test può restare per i test -->
+    <!-- Utility test per GraphQL (non porta l'autoconfig runtime) -->
     <dependency>
       <groupId>org.springframework.graphql</groupId>
       <artifactId>spring-graphql-test</artifactId>
@@ -86,7 +110,7 @@
 
   <build>
     <plugins>
-      <!-- Salva i nomi dei parametri nel bytecode per il binding GraphQL per nome -->
+      <!-- Parametri di compilazione (nome parametri per GraphQL Tools) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
