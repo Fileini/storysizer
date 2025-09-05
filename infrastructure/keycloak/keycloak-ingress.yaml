@@ -1,22 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: keycloak-public
+  name: keycloak-admin
   namespace: auth
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/service.serverstransport: keycloak-backend-tls@kubernetescrd
 spec:
-  ingressClassName: traefik-public
+  ingressClassName: traefik-admin
+  tls:
+    - hosts: [keycloak.admin.cluster.local.com]
+      secretName: wildcard-admin-cluster-tls
   rules:
-    - host: auth.storysizer.org
+    - host: keycloak.admin.cluster.local.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: keycloak          # <-- metti il tuo Service
+                name: keycloak
                 port:
-                  number: 8080          # <-- o 'name: http' se preferisci
-  tls:
-    - hosts:
-        - auth.storysizer.org
-      secretName: keycloak-tls
+                  name: https   # 443 del Service

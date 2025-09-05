@@ -7,6 +7,8 @@ data:
   config.yaml: |
     tunnel: 2c88d1dc-b80f-4e56-ab73-cd13fe637bd1
     credentials-file: /etc/cloudflared/creds/CREDENTIALS.json
+    originCAPool: /etc/cloudflared/ca/origin-ca.pem
+
 
     # (opzionale) default per tutte le regole:
     # originRequest:

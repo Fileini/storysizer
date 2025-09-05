@@ -1,0 +1,9 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: keycloak-backend-tls
+  namespace: keycloak
+spec:
+  serverName: auth.storysizer.org      # SNI verso il pod
+  # Se il cert del pod NON è pubblico/LE e vuoi solo testare:
+  # insecureSkipVerify: true

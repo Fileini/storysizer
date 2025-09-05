@@ -1,0 +1,60 @@
+adminIngress:
+  annotations: {}
+  apiVersion: ""
+  controller: default
+  enabled: true
+  extraHosts: []
+  extraPaths: []
+  extraRules: []
+  extraTls:
+  - hosts:
+    - keycloak.admin.cluster.local.com
+    secretName: wildcard-admin-cluster-tls
+  hostname: keycloak.admin.cluster.local.com
+  ingressClassName: traefik-admin
+  labels: {}
+  pathType: Prefix
+  secrets:
+  - name: wildcard-admin-cluster-tls
+  selfSigned: false
+  tls: true
+adminRealm: master
+auth:
+  adminPassword: ""
+  adminUser: user
+  annotations: {}
+  existingSecret: ""
+  passwordSecretKey: ""
+customCaExistingSecret: ""
+httpRelativePath: /
+image:
+  debug: false
+  digest: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  registry: docker.io
+  repository: bitnami/keycloak
+  tag: 26.1.1-debian-12-r0
+ingress:
+  annotations: {}
+  apiVersion: ""
+  controller: default
+  enabled: true
+  extraHosts: []
+  extraPaths: []
+  extraRules: []
+  extraTls:
+  - hosts:
+    - keycloak.public.cluster.local.com
+    secretName: wildcard-public-cluster-tls
+  hostname: keycloak.public.cluster.local.com
+  hostnameStrict: false
+  ingressClassName: traefik-public
+  labels: {}
+  pathType: Prefix
+  selfSigned: false
+  servicePort: http
+  tls: true
+production: true
+proxy: edge
+proxyHeaders: ""
