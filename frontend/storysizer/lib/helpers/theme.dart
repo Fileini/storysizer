@@ -19,7 +19,8 @@ import 'package:google_fonts/google_fonts.dart';
 /// );
 abstract final class AppTheme {
   // The defined light theme.
-  static ThemeData light = FlexThemeData.light(fontFamily: GoogleFonts.montserrat().fontFamily,
+  static ThemeData light = FlexThemeData.light(fontFamily: 'Montserrat',
+,
   colors: const FlexSchemeColor( // Custom colors
     primary: Color(0xFFFFC107),
     primaryContainer: Color(0xFF657990),
@@ -48,7 +49,7 @@ abstract final class AppTheme {
   cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
   );
   // The defined dark theme.
-  static ThemeData dark = FlexThemeData.dark( fontFamily: GoogleFonts.montserrat().fontFamily,
+  static ThemeData dark = FlexThemeData.dark( fontFamily: 'Montserrat',
   colors: const FlexSchemeColor( // Custom colors
     primary: Color(0xFFFFC107),
     primaryContainer: Color(0xFF343434),
