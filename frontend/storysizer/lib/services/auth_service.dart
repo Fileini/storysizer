@@ -53,12 +53,13 @@ class AuthService {
     keycloak.keycloakEventsStream.listen((event) async => handleEvent(event));
 
     await keycloak.init(
-      initOptions: KeycloakInitOptions(
-        onLoad: 'check-sso',
-        responseMode: 'query',
-        silentCheckSsoRedirectUri: '${Uri.base.origin}/silent-check-sso.html',
-      ),
-    );
+  initOptions: KeycloakInitOptions(
+    onLoad: 'check-sso',
+    responseMode: 'query',
+    silentCheckSsoRedirectUri: 'https://auth.storysizer.org/realms/storysizer/protocol/openid-connect/login-status-iframe.html',
+  ),
+);
+
   }
 
   Future<void> login() async {
