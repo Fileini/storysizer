@@ -22,7 +22,7 @@ spec:
             - containerPort: 5005  # Porta per il debug remoto
           env:
             - name: KEYCLOAK_ISSUER_URI
-              value: "http://keycloak.auth.svc.cluster.local:80/realms/storysizer"
+              value: "https://auth.storysizer.org/realms/storysizer"
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 
@@ -47,7 +47,6 @@ metadata:
   namespace: service-prod
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: selfsigned-clusterissuer
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Origin: "*"
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Methods: "GET, POST, PUT, DELETE, OPTIONS"
     traefik.ingress.kubernetes.io/headers.customResponseHeaders.Access-Control-Allow-Headers: "Content-Type, Authorization, X-Requested-With, Accept"
@@ -56,7 +55,7 @@ metadata:
 spec:
   ingressClassName: traefik-public
   rules:
-    - host: api.storysizer.public.cluster.local.com 
+    - host: api.storysizer.org
       http:
         paths:
           - path: /
@@ -68,5 +67,5 @@ spec:
                   number: 9090
   tls:
     - hosts:
-      - api.storysizer.public.cluster.local.com 
-      secretName: wildcard-public-cluster-tls
+        - api.storysizer.org
+      secretName: gateway-tls   # copia del keycloak-tls

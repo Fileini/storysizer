@@ -15,10 +15,10 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
+            issuer-uri: https://auth.storysizer.org/realms/storysizer
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak.public.cluster.local.com/realms/storysizer
+          issuer-uri: https://auth.storysizer.org/realms/storysizer
 
 # --- CONFIGURAZIONE KICKSTART ---
 graphql:
