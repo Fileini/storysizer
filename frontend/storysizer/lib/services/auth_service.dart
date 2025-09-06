@@ -35,7 +35,7 @@ class AuthService {
   final _LoginInfo = LoginInfo();
 
   static final keycloak = KeycloakService(KeycloakConfig(
-    url: 'https://app.storysizer.org',
+    url: 'https://auth.storysizer.org',
     realm: 'storysizer',
     clientId: 'storysizer',
   ));
