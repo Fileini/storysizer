@@ -81,7 +81,7 @@ class AuthService {
       await login();
     }
     // Aggiorna il token se scade nei prossimi 30s
-    await keycloak.updateToken(minValidity: 60);
+    await keycloak.updateToken(60);
     return keycloak.getToken();
   }
 
@@ -133,7 +133,7 @@ class AuthService {
       tokenRefreshState.value =
           tokenRefreshState.value.copyWith(isRefreshing: true);
       try {
-        await keycloak.updateToken(minValidity: 30);
+await keycloak.updateToken(60);
       } catch (e) {
         print("Errore refresh token: $e");
         await _handleAuthRefreshError();
@@ -159,7 +159,7 @@ class AuthService {
       _forceLogout();
     } else {
       try {
-        await keycloak.updateToken(minValidity: 30);
+await keycloak.updateToken(60);
       } catch (e) {
         print("Errore nuovo tentativo refresh: $e");
       }
