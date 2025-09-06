@@ -33,7 +33,7 @@ class _NameInputScreenState extends State<NameInputScreen> {
                               textAlign: TextAlign.left,
                             ),
                             subtitle: Text(
-                              'Insert a name.',
+                              'Choose a title for your story.',
                               style: Theme.of(context).textTheme.bodySmall,
                               textAlign: TextAlign.left,
                             ),
@@ -51,7 +51,7 @@ class _NameInputScreenState extends State<NameInputScreen> {
                                 child: TextField(maxLength: 26,
                                 controller: _controller,
                                 decoration: const InputDecoration(
-                                  labelText: "Name",
+                                  labelText: "Title",
                                   border: OutlineInputBorder(),
                                 ),
                               ),
