@@ -81,7 +81,7 @@ class AuthService {
       await login();
     }
     // Aggiorna il token se scade nei prossimi 30s
-    await keycloak.updateToken(minValidity: 30);
+    await keycloak.updateToken(minValidity: 60);
     return keycloak.getToken();
   }
 
