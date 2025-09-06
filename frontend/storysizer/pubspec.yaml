@@ -73,7 +73,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-    - packages/sign_in_button/assets/logos/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -94,9 +93,9 @@ flutter:
   fonts:
     - family: Montserrat
       fonts:
-        - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
-        - asset: assets/fonts/Montserrat/Montserrat-Bold.ttf
+        - asset: assets/Montserrat/Montserrat-Regular.ttf
+        - asset: assets/Montserrat/Montserrat-Bold.ttf
 
-        
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
