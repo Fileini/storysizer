@@ -20,7 +20,6 @@ import 'package:google_fonts/google_fonts.dart';
 abstract final class AppTheme {
   // The defined light theme.
   static ThemeData light = FlexThemeData.light(fontFamily: 'Montserrat',
-,
   colors: const FlexSchemeColor( // Custom colors
     primary: Color(0xFFFFC107),
     primaryContainer: Color(0xFF657990),
