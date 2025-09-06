@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart' show ChangeNotifier, ValueNotifier, immutable;
 import 'package:keycloak_flutter/keycloak_flutter.dart';
 
+/// -----------------------------------
+///  Login Info (notifica cambi stato)
+/// -----------------------------------
 class LoginInfo extends ChangeNotifier {
   var _isInitialized = false;
   var _isLoggedIn = false;
@@ -8,10 +11,11 @@ class LoginInfo extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitialized => _isInitialized;
 
-set isInitialized(bool value) {
+  set isInitialized(bool value) {
     _isInitialized = value;
     notifyListeners();
   }
+
   set isLoggedIn(bool value) {
     _isLoggedIn = value;
     notifyListeners();
@@ -29,10 +33,11 @@ class AuthService {
   final ValueNotifier<TokenRefreshState> tokenRefreshState =
       ValueNotifier(const TokenRefreshState());
 
-    factory AuthService() {
+  factory AuthService() {
     return instance;
   }
-  final _LoginInfo = LoginInfo();
+
+  final _loginInfo = LoginInfo();
 
   static final keycloak = KeycloakService(KeycloakConfig(
     url: 'https://auth.storysizer.org',
@@ -40,12 +45,11 @@ class AuthService {
     clientId: 'storysizer',
   ));
 
-  get loginInfo => _LoginInfo;
+  get loginInfo => _loginInfo;
 
   AuthService._internal();
 
   Future<void> init() async {
-    
     keycloak.keycloakEventsStream.listen((event) async => handleEvent(event));
 
     await keycloak.init(
@@ -55,7 +59,6 @@ class AuthService {
         silentCheckSsoRedirectUri: '${Uri.base.origin}/silent-check-sso.html',
       ),
     );
-
   }
 
   Future<void> login() async {
@@ -68,20 +71,20 @@ class AuthService {
     try {
       await keycloak.logout();
     } catch (e) {
-      // log error
+      print("Errore logout: $e");
     }
   }
-Future<String> getAccessToken() async {
-  
-  if (!keycloak.authenticated) {
-    await login();
-  }
-  await keycloak.updateToken();
-  
-  return keycloak.getToken(); 
-}
 
-Future<void> handleEvent(KeycloakEvent event) async {
+  Future<String> getAccessToken() async {
+    if (!keycloak.authenticated) {
+      await login();
+    }
+    // Aggiorna il token se scade nei prossimi 30s
+    await keycloak.updateToken(minValidity: 30);
+    return keycloak.getToken();
+  }
+
+  Future<void> handleEvent(KeycloakEvent event) async {
     switch (event.type) {
       case KeycloakEventType.onReady:
         _handleReady();
@@ -93,7 +96,7 @@ Future<void> handleEvent(KeycloakEvent event) async {
         _handleAuthLogout();
         break;
       case KeycloakEventType.onTokenExpired:
-        _handleTokenExpired();
+        await _handleTokenExpired();
         break;
       case KeycloakEventType.onAuthRefreshSuccess:
         _handleAuthRefreshSuccess();
@@ -107,13 +110,12 @@ Future<void> handleEvent(KeycloakEvent event) async {
   }
 
   void _handleReady() {
-    _LoginInfo.isInitialized = true;
+    _loginInfo.isInitialized = true;
   }
 
   Future<void> _handleAuthSuccess() async {
     _keycloakProfile = await keycloak.loadUserProfile();
-    _LoginInfo.isLoggedIn = true;
-    // Resetta il contatore di errori al login avvenuto con successo.
+    _loginInfo.isLoggedIn = true;
     tokenRefreshState.value = tokenRefreshState.value.copyWith(
       isRefreshing: false,
       failureCount: 0,
@@ -122,15 +124,22 @@ Future<void> handleEvent(KeycloakEvent event) async {
 
   void _handleAuthLogout() {
     _keycloakProfile = null;
-    _LoginInfo.isLoggedIn = false;
+    _loginInfo.isLoggedIn = false;
   }
 
-  void _handleTokenExpired() {
+  Future<void> _handleTokenExpired() async {
     if (!tokenRefreshState.value.isRefreshing) {
       tokenRefreshState.value =
           tokenRefreshState.value.copyWith(isRefreshing: true);
-      keycloak.updateToken();
-      keycloak.updateToken();
+      try {
+        await keycloak.updateToken(minValidity: 30);
+      } catch (e) {
+        print("Errore refresh token: $e");
+        await _handleAuthRefreshError();
+      } finally {
+        tokenRefreshState.value =
+            tokenRefreshState.value.copyWith(isRefreshing: false);
+      }
     }
   }
 
@@ -148,22 +157,23 @@ Future<void> handleEvent(KeycloakEvent event) async {
     if (newFailureCount >= _maxRefreshAttempts) {
       _forceLogout();
     } else {
-      await keycloak.updateToken();
+      try {
+        await keycloak.updateToken(minValidity: 30);
+      } catch (e) {
+        print("Errore nuovo tentativo refresh: $e");
+      }
     }
   }
+
   void _forceLogout() {
-    // Pulizia dello stato e logout forzato
     logout();
     _keycloakProfile = null;
-    _LoginInfo.isLoggedIn = false;
+    _loginInfo.isLoggedIn = false;
   }
 
-
-
   /// -----------------------------------
-  ///  8- getUserProfile
+  ///  getUserProfile
   /// -----------------------------------
-
   Future<Map<String, String>> getUserProfile() async {
     try {
       if (_keycloakProfile == null) {
@@ -186,10 +196,9 @@ Future<void> handleEvent(KeycloakEvent event) async {
         "lastName": _keycloakProfile?.lastName ?? "Utente sconosciuto",
       };
 
-      //print('Profilo utente: $userProfile');
       return userProfile;
     } catch (e) {
-      //print("Errore nel recupero del profilo utente: $e");
+      print("Errore nel recupero del profilo utente: $e");
       return {
         "id": "Errore",
         "username": "Errore nel caricamento",
@@ -200,6 +209,9 @@ Future<void> handleEvent(KeycloakEvent event) async {
   }
 }
 
+/// -----------------------------------
+///  Stato Refresh Token
+/// -----------------------------------
 @immutable
 class TokenRefreshState {
   final bool isRefreshing;
@@ -220,4 +232,3 @@ class TokenRefreshState {
     );
   }
 }
-
