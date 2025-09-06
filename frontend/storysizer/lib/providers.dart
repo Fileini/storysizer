@@ -65,7 +65,7 @@ final graphqlClientProvider = Provider<GraphQLClient>((ref) {
     },
   );
 
-  final httpLink = HttpLink('https://api.storysizer.public.cluster.local.com/graphql');
+  final httpLink = HttpLink('https://api.storysizer.org/graphql');
   final link = authLink.concat(httpLink);
 
   return GraphQLClient(
