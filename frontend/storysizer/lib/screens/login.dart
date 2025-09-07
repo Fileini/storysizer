@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:html' as html; // per aprire i link su Flutter Web
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -42,6 +43,29 @@ class LoginScreen extends StatelessWidget {
               "StorySizer",
               style: Theme.of(context).textTheme.displayLarge,
               textAlign: TextAlign.center,
+            ),
+            // Sezione link Terms + Privacy
+            Column(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    html.window.open('/terms.html', '_blank');
+                  },
+                  child: const Text(
+                    "Terms of Service",
+                    style: TextStyle(fontSize: 12, color: Colors.blue),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    html.window.open('/privacy.html', '_blank');
+                  },
+                  child: const Text(
+                    "Privacy Policy",
+                    style: TextStyle(fontSize: 12, color: Colors.blue),
+                  ),
+                ),
+              ],
             ),
             const LoginButton(),
           ],
