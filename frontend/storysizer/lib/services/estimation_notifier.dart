@@ -74,7 +74,7 @@ class EstimationCreationNotifier extends StateNotifier<EstimationCreationState> 
         name: name,
         complexity: complexity,
         reach: reach,
-        dimension: dimension,
+        dimensions: dimension,
         risk: risk,
         interaction: interaction,
         storyId: storyId,
