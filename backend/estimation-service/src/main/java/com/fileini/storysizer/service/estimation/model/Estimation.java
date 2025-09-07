@@ -53,6 +53,6 @@ public class Estimation {
     public void setDimensions(int dimensions) { this.dimensions = dimensions; }
     public void setRisk(int risk) { this.risk = risk; }
     public void setInteraction(int interaction) { this.interaction = interaction; }
-    public void setSizer(int size) {        this.sizer = sizer;    }
+    public void setSizer(int sizer) {        this.sizer = sizer;    }
 
 }

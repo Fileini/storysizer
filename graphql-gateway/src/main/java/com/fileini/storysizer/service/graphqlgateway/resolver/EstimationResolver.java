@@ -30,11 +30,10 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
         String owner = currentOwner();
         if (owner == null) return null;
 
-        String url = UriComponentsBuilder.fromUriString(baseUrlEstimation + "/owner")
-        .path(owner)   // encoda l’intero valore come path
+        String url = UriComponentsBuilder.fromUriString(baseUrlEstimation + "/owner/{owner}")
+        .buildAndExpand(owner)
         .toUriString();
     
-
         ResponseEntity<List<Estimation>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
