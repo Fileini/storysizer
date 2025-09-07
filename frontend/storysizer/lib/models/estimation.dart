@@ -32,7 +32,7 @@ class Estimation {
       dimensions: json['dimensions'] as int,
       risk: json['risk'] as int,
       interaction: json['interaction'] as int,
-      size: json['size'] != null ? json['size'] as int : null,
+      size: json['size'] != null ? int.tryParse(json['size'].toString()) : null,
       story: Story.fromJson(json['story'] as Map<String, dynamic>),
     );
   }
