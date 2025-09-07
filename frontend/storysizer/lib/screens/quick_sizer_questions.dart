@@ -80,7 +80,7 @@ class _QuickSizerQuestionsViewState extends ConsumerState<QuickSizerQuestionsVie
               name: widget.name,
               complexity: selectedValues[1]+1,
               reach: selectedValues[0]+1,
-              dimension: selectedValues[2]+1,
+              dimensions: selectedValues[2]+1,
               risk: selectedValues[3]+1,
               interaction: selectedValues[4]+1,
               storyId: story.id,
