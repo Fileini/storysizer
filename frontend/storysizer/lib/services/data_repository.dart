@@ -41,7 +41,7 @@ class DataRepository {
           dimensions
           risk
           interaction
-          size
+          sizer
           story {
             id
             name
@@ -125,7 +125,7 @@ class DataRepository {
           dimensions
           risk
           interaction
-          size
+          sizer
           story {
             id
             name

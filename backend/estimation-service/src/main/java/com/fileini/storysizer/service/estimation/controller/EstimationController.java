@@ -68,7 +68,7 @@ public class EstimationController {
         if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(1);}
         if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(1);}
 
-        estimation.setSize(estimationService.calculateSize(estimation));
+        estimation.setSizer(estimationService.calculateSize(estimation));
 
         return repository.save(estimation);
     }
@@ -84,7 +84,7 @@ public class EstimationController {
          if (estimation.getReach()>5){estimation.setReach(5);}if (estimation.getReach()<1){estimation.setReach(1);}
          if (estimation.getRisk()>5){estimation.setRisk(5);}if (estimation.getRisk()<1){estimation.setRisk(1);}
 
-         estimation.setSize(estimationService.calculateSize(estimation));
+         estimation.setSizer(estimationService.calculateSize(estimation));
 
         return repository.save(estimation);
     }

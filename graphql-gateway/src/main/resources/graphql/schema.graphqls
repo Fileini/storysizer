@@ -35,5 +35,5 @@ type Estimation @key(fields: "id") {
   dimensions: Int!
   risk: Int!
   interaction: Int!
-  size: Int
+  sizer: Int
 }

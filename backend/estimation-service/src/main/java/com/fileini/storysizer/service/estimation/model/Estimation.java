@@ -16,14 +16,14 @@ public class Estimation {
     private int dimensions;
     private int risk;
     private int interaction;
-    private int size;
+    private int sizer;
 
     
 
     // Costruttori, Getter e Setter
     public Estimation() {}
 
-    public Estimation(String owner, int complexity, int reach, Long storyId, int dimensions, int risk, int interaction, int size) {
+    public Estimation(String owner, int complexity, int reach, Long storyId, int dimensions, int risk, int interaction, int sizer) {
         this.owner = owner;
         this.complexity = complexity;
         this.reach = reach;
@@ -31,7 +31,7 @@ public class Estimation {
         this.dimensions = dimensions;
         this.risk = risk;
         this.interaction = interaction;
-        this.size = size;
+        this.sizer = sizer;
     }
 
     // Getter e Setter
@@ -43,7 +43,7 @@ public class Estimation {
     public int getDimensions() { return dimensions; }
     public int getRisk() { return risk; }
     public int getInteraction() { return interaction; }
-    public int getSize() {        return size;    }
+    public int getSizer() {        return size;    }
 
     public void setId(Long id) { this.id = id; }
     public void setOwner(String owner) { this.owner = owner; }
@@ -53,6 +53,6 @@ public class Estimation {
     public void setDimensions(int dimensions) { this.dimensions = dimensions; }
     public void setRisk(int risk) { this.risk = risk; }
     public void setInteraction(int interaction) { this.interaction = interaction; }
-    public void setSize(int size) {        this.size = size;    }
+    public void setSizer(int size) {        this.size = size;    }
 
 }
