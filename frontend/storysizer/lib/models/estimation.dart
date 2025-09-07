@@ -35,7 +35,7 @@ class Estimation {
       size: json['size'] != null ? json['size'] as int : null,
       story: Story.fromJson(json['story'] as Map<String, dynamic>),
     );
-
+  }
     Map<String, dynamic> toJson() => {
         'id': id,
         'owner': owner,
@@ -50,5 +50,5 @@ class Estimation {
 
   @override
   String toString() => toJson().toString();
-  }
+  
 }
