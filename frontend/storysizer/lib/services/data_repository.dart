@@ -58,7 +58,9 @@ class DataRepository {
     }
     
     final List estimationsData = result.data?['estimations'] ?? [];
+    print("DEBUG raw estimationsData = $estimationsData");
     return estimationsData.map((e) => Estimation.fromJson(e)).toList();
+
   }
   
   // Crea una nuova Story
