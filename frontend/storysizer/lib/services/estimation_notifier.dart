@@ -28,6 +28,7 @@ class EstimationsNotifier extends StateNotifier<EstimationsState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final estimations = await repository.fetchEstimations();
+      print("DEBUG: Estimations loaded -> $estimations");
       state = state.copyWith(isLoading: false, estimations: estimations);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

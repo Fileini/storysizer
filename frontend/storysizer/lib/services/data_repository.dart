@@ -92,7 +92,7 @@ class DataRepository {
     required String name,
     required int complexity,
     required int reach,
-    required int dimension,
+    required int dimensions,
     required int risk,
     required int interaction,
     required String storyId,
