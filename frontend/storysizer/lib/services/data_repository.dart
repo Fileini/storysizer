@@ -102,7 +102,7 @@ class DataRepository {
         $name: String!, 
         $complexity: Int!, 
         $reach: Int!, 
-        $dimension: Int!, 
+        $dimensions: Int!, 
         $risk: Int!, 
         $interaction: Int!, 
         $storyId: String!
@@ -111,7 +111,7 @@ class DataRepository {
           name: $name, 
           complexity: $complexity, 
           reach: $reach, 
-          dimension: $dimension, 
+          dimensions: $dimensions, 
           risk: $risk, 
           interaction: $interaction, 
           storyId: $storyId
@@ -140,7 +140,7 @@ class DataRepository {
           'name': name,
           'complexity': complexity,
           'reach': reach,
-          'dimension': dimension,
+          'dimensions': dimensions,
           'risk': risk,
           'interaction': interaction,
           'storyId': storyId,
