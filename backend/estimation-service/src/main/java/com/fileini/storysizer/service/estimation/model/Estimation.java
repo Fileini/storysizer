@@ -43,7 +43,7 @@ public class Estimation {
     public int getDimensions() { return dimensions; }
     public int getRisk() { return risk; }
     public int getInteraction() { return interaction; }
-    public int getSizer() {        return size;    }
+    public int getSizer() {        return sizer;    }
 
     public void setId(Long id) { this.id = id; }
     public void setOwner(String owner) { this.owner = owner; }
@@ -53,6 +53,6 @@ public class Estimation {
     public void setDimensions(int dimensions) { this.dimensions = dimensions; }
     public void setRisk(int risk) { this.risk = risk; }
     public void setInteraction(int interaction) { this.interaction = interaction; }
-    public void setSizer(int size) {        this.size = size;    }
+    public void setSizer(int size) {        this.sizer = sizer;    }
 
 }
