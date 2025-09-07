@@ -46,78 +46,74 @@
   <script src="js/keycloak.umd.js"></script>
 </head>
 <body>
-  <script>
-    (function () {
-      try {
-        var ua = navigator.userAgent || '';
-        var isLinkedIn = ua.indexOf('LinkedInApp') !== -1;
-        if (!isLinkedIn) return;
-    
-        var isIOS = /iPhone|iPad|iPod/.test(ua);
-        var isAndroid = /Android/.test(ua);
-    
-        function showBanner(msg) {
-          var bar = document.createElement('div');
-          bar.style.position = 'fixed';
-          bar.style.left = 0;
-          bar.style.right = 0;
-          bar.style.bottom = 0;
-          bar.style.zIndex = 99999;
-          bar.style.padding = '12px 16px';
-          bar.style.background = '#111';
-          bar.style.color = '#fff';
-          bar.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
-          bar.style.fontSize = '14px';
-          bar.style.boxShadow = '0 -2px 10px rgba(0,0,0,.25)';
-          bar.innerHTML = msg;
-          document.body.appendChild(bar);
-        }
-    
-        if (isIOS) {
-          // iOS: usa x-safari su iOS 17+
-          var m = ua.match(/OS (\d+)_/i);
-          var iosMajor = m && m[1] ? parseInt(m[1], 10) : null;
-          var supportsXSafari = iosMajor && iosMajor >= 17;
-          var alreadyXSafari = location.href.indexOf('x-safari-') === 0;
-    
-          if (supportsXSafari && !alreadyXSafari) {
-            window.location.href = 'x-safari-' + window.location.href;
-            return;
-          }
-    
-          // Fallback iOS < 17
-          showBanner('Per accedere con Google, apri questo link in Safari: <u>tocca ⋯ e scegli "Apri in Safari"</u>.');
-          return;
-        }
-    
-        if (isAndroid) {
-          // Android: prova ad aprire in Chrome via intent://
-          var httpsUrl = window.location.href;
-          var intentUrl =
-            'intent://' +
-            httpsUrl.replace(/^https?:\/\//, '') +
-            '#Intent;scheme=https;package=com.android.chrome;end';
-    
-          // Se l’intent non riesce (o Chrome non c’è), dopo un attimo mostra il banner
-          var timer = setTimeout(function () {
-            showBanner('Per accedere con Google, apri in un browser esterno: <u>tocca ⋮ e scegli "Apri in Chrome"</u>.');
-          }, 1200);
-    
-          try {
-            window.location.href = intentUrl;
-          } catch (e) {
-            // In caso di eccezione immediata, mostra subito il fallback
-            clearTimeout(timer);
-            showBanner('Per accedere con Google, apri in un browser esterno: <u>tocca ⋮ e scegli "Apri in Chrome"</u>.');
-          }
-          return;
-        }
-      } catch (e) {
-        // no-op
+  <!-- LinkedIn in-app browser SSO fix (iOS + Android) -->
+<script>
+  (function() {
+    var ua = navigator.userAgent || '';
+    var isLinkedIn = /LinkedInApp/i.test(ua) || /liinternal/i.test(ua);
+    if (!isLinkedIn) return;
+  
+    var href = window.location.href;
+  
+    function writeInterstitial(msg, extraHtml) {
+      document.open();
+      document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Open in browser</title>');
+      document.write('<style>body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b1020;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;} .card{max-width:540px;padding:24px;border-radius:16px;background:#141a2b;box-shadow:0 10px 30px rgba(0,0,0,.35)} h1{font-size:22px;margin:0 0 8px} p{margin:0 0 16px;line-height:1.5;color:#cbd5e1} .btn{display:inline-block;padding:12px 16px;border-radius:10px;border:0;background:#2563eb;color:#fff;text-decoration:none;font-weight:600} .muted{font-size:13px;color:#94a3b8;margin-top:8px} code{word-break:break-all}</style></head><body>');
+      document.write('<div class="card"><h1>Open StorySizer in your browser</h1><p>'+ msg +'</p>' + (extraHtml||'') + '<p class="muted">If nothing happens, copy & paste this URL in Safari/Chrome:<br><code>'+ href +'</code></p></div>');
+      document.write('</body></html>');
+      document.close();
+    }
+  
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+  
+    if (isIOS) {
+      var m = ua.match(/OS (\d+)_/i);
+      var major = m && m[1] ? parseInt(m[1],10) : 0;
+      var supportsXSafari = major >= 17;
+  
+      if (supportsXSafari) {
+        // Prova ad aprire in Safari; se resta qui, mostra fallback
+        setTimeout(function() {
+          writeInterstitial(
+            'LinkedIn\'s in-app browser blocks Google sign-in. Tap the button below to continue in Safari.',
+            '<p><a class="btn" href="x-safari-'+ href +'">Continue in Safari</a></p>'
+          );
+        }, 1200);
+        location.href = 'x-safari-' + href;
+      } else {
+        // iOS < 17: niente x-safari affidabile
+        writeInterstitial(
+          'LinkedIn\'s in-app browser blocks Google sign-in. Open this page in Safari.',
+          '<p>Tap ••• then <b>"Open in Safari"</b>.</p>'
+        );
       }
-    })();
-    </script>
-    
+      return;
+    }
+  
+    if (isAndroid) {
+      // Prova a forzare Chrome; fallback se non va
+      var intentUrl = 'intent://' + href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+      var timer = setTimeout(function(){
+        writeInterstitial(
+          'LinkedIn\'s in-app browser may block Google sign-in. Open this page in Chrome.',
+          '<p><a class="btn" href="'+ href +'" target="_blank" rel="noopener">Open in browser</a></p>'
+        );
+      }, 1200);
+  
+      try { location.href = intentUrl; }
+      catch(e) {
+        clearTimeout(timer);
+        writeInterstitial(
+          'Open this page in Chrome.',
+          '<p><a class="btn" href="'+ href +'" target="_blank" rel="noopener">Open in browser</a></p>'
+        );
+      }
+      return;
+    }
+  })();
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
