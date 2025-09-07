@@ -48,7 +48,7 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
             String name,
             Integer complexity,
             Integer reach,
-            Integer dimension,
+            Integer dimensions,
             Integer risk,
             Integer interaction,
             String storyId
@@ -80,7 +80,7 @@ public class EstimationResolver implements GraphQLQueryResolver, GraphQLMutation
         payload.put("complexity", complexity);
         payload.put("reach", reach);
         payload.put("storyId", story.get(0).get("id"));
-        payload.put("dimensions", dimension);
+        payload.put("dimensions", dimensions);
         payload.put("risk", risk);
         payload.put("interaction", interaction);
 
