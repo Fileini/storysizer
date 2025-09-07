@@ -45,7 +45,6 @@ class Estimation {
         'risk': risk,
         'interaction': interaction,
         'size': size,
-        'story': story.toJson(),
       };
 
   @override
