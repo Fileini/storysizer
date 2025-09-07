@@ -43,14 +43,14 @@ class _HistoryViewState extends ConsumerState<HistoryView> with RouteAware {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Storico"),
+        title: const Text("History"),
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.error != null
               ? Center(child: Text("Errore: ${state.error}"))
               : state.estimations == null || state.estimations!.isEmpty
-                  ? const Center(child: Text("Nessuna storia presente"))
+                  ? const Center(child: Text("History is Empty."))
                   : ListView.builder(
                       itemCount: state.estimations!.length,
                       itemBuilder: (context, index) {
