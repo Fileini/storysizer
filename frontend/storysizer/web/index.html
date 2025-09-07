@@ -46,6 +46,78 @@
   <script src="js/keycloak.umd.js"></script>
 </head>
 <body>
+  <script>
+    (function () {
+      try {
+        var ua = navigator.userAgent || '';
+        var isLinkedIn = ua.indexOf('LinkedInApp') !== -1;
+        if (!isLinkedIn) return;
+    
+        var isIOS = /iPhone|iPad|iPod/.test(ua);
+        var isAndroid = /Android/.test(ua);
+    
+        function showBanner(msg) {
+          var bar = document.createElement('div');
+          bar.style.position = 'fixed';
+          bar.style.left = 0;
+          bar.style.right = 0;
+          bar.style.bottom = 0;
+          bar.style.zIndex = 99999;
+          bar.style.padding = '12px 16px';
+          bar.style.background = '#111';
+          bar.style.color = '#fff';
+          bar.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+          bar.style.fontSize = '14px';
+          bar.style.boxShadow = '0 -2px 10px rgba(0,0,0,.25)';
+          bar.innerHTML = msg;
+          document.body.appendChild(bar);
+        }
+    
+        if (isIOS) {
+          // iOS: usa x-safari su iOS 17+
+          var m = ua.match(/OS (\d+)_/i);
+          var iosMajor = m && m[1] ? parseInt(m[1], 10) : null;
+          var supportsXSafari = iosMajor && iosMajor >= 17;
+          var alreadyXSafari = location.href.indexOf('x-safari-') === 0;
+    
+          if (supportsXSafari && !alreadyXSafari) {
+            window.location.href = 'x-safari-' + window.location.href;
+            return;
+          }
+    
+          // Fallback iOS < 17
+          showBanner('Per accedere con Google, apri questo link in Safari: <u>tocca ⋯ e scegli "Apri in Safari"</u>.');
+          return;
+        }
+    
+        if (isAndroid) {
+          // Android: prova ad aprire in Chrome via intent://
+          var httpsUrl = window.location.href;
+          var intentUrl =
+            'intent://' +
+            httpsUrl.replace(/^https?:\/\//, '') +
+            '#Intent;scheme=https;package=com.android.chrome;end';
+    
+          // Se l’intent non riesce (o Chrome non c’è), dopo un attimo mostra il banner
+          var timer = setTimeout(function () {
+            showBanner('Per accedere con Google, apri in un browser esterno: <u>tocca ⋮ e scegli "Apri in Chrome"</u>.');
+          }, 1200);
+    
+          try {
+            window.location.href = intentUrl;
+          } catch (e) {
+            // In caso di eccezione immediata, mostra subito il fallback
+            clearTimeout(timer);
+            showBanner('Per accedere con Google, apri in un browser esterno: <u>tocca ⋮ e scegli "Apri in Chrome"</u>.');
+          }
+          return;
+        }
+      } catch (e) {
+        // no-op
+      }
+    })();
+    </script>
+    
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
