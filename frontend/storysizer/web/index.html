@@ -59,7 +59,7 @@
       document.open();
       document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Open in browser</title>');
       document.write('<style>body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b1020;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center;} .card{max-width:540px;padding:24px;border-radius:16px;background:#141a2b;box-shadow:0 10px 30px rgba(0,0,0,.35)} h1{font-size:22px;margin:0 0 8px} p{margin:0 0 16px;line-height:1.5;color:#cbd5e1} .btn{display:inline-block;padding:12px 16px;border-radius:10px;border:0;background:#2563eb;color:#fff;text-decoration:none;font-weight:600} .muted{font-size:13px;color:#94a3b8;margin-top:8px} code{word-break:break-all}</style></head><body>');
-      document.write('<div class="card"><h1>Open StorySizer in your browser</h1><p>'+ msg +'</p>' + (extraHtml||'') + '<p class="muted">If nothing happens, tap the top-right ... button and choose open in browser or copy & paste this URL in Safari/Chrome:<br><code>'+ href +'</code></p></div>');
+      document.write('<div class="card"><h1>Open StorySizer in your browser</h1><p>'+ msg +'</p>' + (extraHtml||'') + '<p class="muted">If nothing happens, tap the top-right button (...) and choose open in browser or copy & paste this URL in Safari/Chrome:<br><code>'+ href +'</code></p></div>');
       document.write('</body></html>');
       document.close();
     }
