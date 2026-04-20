@@ -56,7 +56,8 @@ class AuthService {
   initOptions: KeycloakInitOptions(
     onLoad: 'check-sso',
     responseMode: 'query',
-    silentCheckSsoRedirectUri: 'https://auth.storysizer.org/realms/storysizer/protocol/openid-connect/login-status-iframe.html',
+    // Must be an app-owned page on the same origin so postMessage can return to SPA.
+    silentCheckSsoRedirectUri: 'https://app.storysizer.org/silent-check-sso.html',
   ),
 );
 

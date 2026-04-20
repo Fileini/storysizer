@@ -67,9 +67,9 @@ extraEnvVars:
   - name: KC_DB_PASSWORD
     value: "REDACTED_DB_PASSWORD"
   - name: KC_HOSTNAME
-    value: "https://auth.storysizer.org"
+    value: "auth.storysizer.org"
   - name: KC_HOSTNAME_ADMIN
-    value: "https://keycloak.admin.cluster.local.com"
+    value: "keycloak.admin.cluster.local.com"
   - name: KC_HOSTNAME_STRICT
     value: "true"
   # rimuovi questa per evitare il warning "Hostname v1 ...":

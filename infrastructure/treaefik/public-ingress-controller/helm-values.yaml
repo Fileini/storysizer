@@ -8,10 +8,7 @@ deployment:
 
 service:
   enabled: true
-  type: LoadBalancer
-  spec:
-    loadBalancerIP: "192.168.1.31"
-  
+  type: ClusterIP  
 ingressClass: 
   enabled: true
   isDefaultClass: true
@@ -23,8 +20,6 @@ providers:
     allowEmptyServices: false
     ingressClass: "traefik-public"
   kubernetesIngress:
-    ingressEndpoint:
-      publishedService: "ingress/traefik-public"
     ingressClass: "traefik-public"
 
 ingressRoute:
