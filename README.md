@@ -69,6 +69,18 @@ cd graphql-gateway
 ./mvnw spring-boot:run
 ```
 
+## Diagrammi
+
+La cartella [docs/infrastructure-diagram/](docs/infrastructure-diagram/) contiene i diagrammi dell'infrastruttura:
+
+| File | Contenuto |
+|------|-----------|
+| [storysizer-infrastructure-complete.drawio](docs/infrastructure-diagram/storysizer-infrastructure-complete.drawio) | Diagramma completo (draw.io) — cluster, rete, servizi, tunnel |
+| [storysizerinfrastructure.drawio](docs/infrastructure-diagram/storysizerinfrastructure.drawio) | Versione precedente del diagramma |
+| [storysizerinfrastructure.drawio.svg](docs/infrastructure-diagram/storysizerinfrastructure.drawio.svg) | Export SVG — visualizzabile direttamente nel browser |
+
+Per aprire i file `.drawio`: [draw.io](https://app.diagrams.net/) (File → Open from → Device).
+
 ## Deploy Produzione
 
 Il deploy avviene tramite pipeline Jenkins (vedi [devops/README.md](devops/README.md)):
