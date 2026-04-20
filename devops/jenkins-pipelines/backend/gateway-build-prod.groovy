@@ -28,7 +28,7 @@ spec:
         - name: workspace-volume
           mountPath: /home/jenkins/agent
     - name: openjdk
-      image: openjdk:17
+      image: eclipse-temurin:17-jdk-jammy
       command: ['cat']
       tty: true
       volumeMounts:
