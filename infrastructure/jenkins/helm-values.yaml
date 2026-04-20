@@ -3,7 +3,6 @@
 #
 # Startup ordering: Jenkins can start after Traefik is up (no auth dependency)
 # priorityClassName not critical since Jenkins is CI/CD, not user-facing
-USER-SUPPLIED VALUES:
 controller:
   priorityClassName: application-standard
   additionalPlugins: []

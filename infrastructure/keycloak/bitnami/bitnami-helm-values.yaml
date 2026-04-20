@@ -1,5 +1,5 @@
 # Startup ordering: Keycloak is infrastructure-critical (needed by gateway)
-priorityclassname: infrastructure-critical
+priorityClassName: infrastructure-critical
 
 image:
   registry: docker.io
