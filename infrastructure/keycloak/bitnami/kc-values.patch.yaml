@@ -56,6 +56,7 @@ hostnameStrict: false
 
 # Ingress pubblico (se lo gestisci dal chart)
 ingress:
+  tls: false
   extraHosts:
     - name: auth.storysizer.org
       path: /

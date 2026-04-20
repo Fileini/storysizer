@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Clearing cache...</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0b1020;color:#fff}
+.box{text-align:center;max-width:500px}h1{color:#2563eb}#log{text-align:left;background:#141a2b;padding:16px;border-radius:8px;margin-top:16px;font-size:14px;line-height:1.8}</style>
+</head>
+<body>
+<div class="box">
+<h1>StorySizer - Cache Reset</h1>
+<p>Clearing service workers and caches...</p>
+<div id="log"></div>
+</div>
+<script>
+var log = document.getElementById("log");
+function msg(t){ log.innerHTML += t + "<br>"; }
+(async function(){
+  try {
+    if ("serviceWorker" in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      msg("Found " + regs.length + " service worker(s)");
+      for (var r of regs) {
+        await r.unregister();
+        msg("Unregistered SW: " + (r.scope || "unknown"));
+      }
+    } else { msg("No service worker support"); }
+
+    if ("caches" in window) {
+      var names = await caches.keys();
+      msg("Found " + names.length + " cache(s)");
+      for (var n of names) {
+        await caches.delete(n);
+        msg("Deleted cache: " + n);
+      }
+    }
+
+    msg("");
+    msg("<b style=color:#22c55e>Done! Redirecting in 3s...</b>");
+    setTimeout(function(){ window.location.href = "/?nocache=" + Date.now(); }, 3000);
+  } catch(e) {
+    msg("<b style=color:red>Error: " + e.message + "</b>");
+  }
+})();
+</script>
+</body>
+</html>
