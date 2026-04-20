@@ -1,3 +1,6 @@
+# Startup ordering: Keycloak is infrastructure-critical (needed by gateway)
+priorityclassname: infrastructure-critical
+
 image:
   registry: docker.io
   repository: bitnami/keycloak

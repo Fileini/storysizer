@@ -3,6 +3,80 @@
 
 ![Alt text here](../docs/infrastructure-diagram/storysizerinfrastructure.drawio.svg)
 
+# Startup Ordering (Bare Metal)
+
+Il cluster k3s su bare metal richiede un ordine di avvio corretto dopo un reboot. Questo è gestito automaticamente tramite:
+
+1. **PriorityClasses** - Garantiscono che i componenti critici vengano schedulati prima
+2. **Init Containers** - I servizi aspettano le loro dipendenze prima di avviarsi
+3. **Readiness Probes** - Kubernetes non invia traffico a pod non pronti
+
+## Ordine di Avvio
+
+```
+1. MetalLB (system-cluster-critical)
+   ↓
+2. Traefik Admin + Public (system-cluster-critical)
+   ↓
+3. cert-manager
+   ↓
+4. PostgreSQL microservices (infrastructure-critical)
+   ↓
+5. Keycloak (infrastructure-critical)
+   ↓
+6. Jenkins (application-standard, parallelo)
+   ↓
+7. story-service, estimation-service (aspettano PostgreSQL)
+   ↓
+8. gateway-service (aspetta Keycloak OIDC)
+   ↓
+9. cloudflared (aspetta Traefik public)
+   ↓
+10. Frontend (nessuna dipendenza bloccante)
+```
+
+## Applicazione Manuale (Disaster Recovery)
+
+Se necessario riapplicare tutto in ordine:
+
+```bash
+cd infrastructure/
+./apply-in-order.sh              # Applica tutto in ordine
+./apply-in-order.sh --dry-run    # Solo verifica, nessuna modifica
+./apply-in-order.sh --skip-helm  # Salta gli upgrade Helm
+```
+
+## Verifica Startup
+
+```bash
+# Verifica PriorityClasses
+kubectl get priorityclass
+
+# Verifica stato pod
+kubectl get pods -A | grep -E 'metallb|traefik|keycloak|postgres|jenkins|gateway|story|estimation|frontend|cloudflare'
+
+# Se un pod è bloccato in Init, controlla i log dell'init container
+kubectl logs <pod-name> -c wait-for-postgres -n <namespace>
+kubectl logs <pod-name> -c wait-for-keycloak -n <namespace>
+```
+
+## File Modificati per Startup Ordering
+
+| File | Modifiche |
+|------|-----------|
+| `priority-classes.yaml` | Definisce infrastructure-critical e application-standard |
+| `common/wait-scripts-configmap.yaml` | Script di wait per init containers |
+| `backend/*/prod-*-manifest.yaml` | + initContainers, + probes, + priorityClassName |
+| `database/microservices-postgres.yaml` | + probes, + priorityClassName |
+| `cloudflare/cloudflared-deploy.yaml` | + initContainers, + probes |
+| `frontend/prod-frontend-manifest.yaml` | + probes, + priorityClassName |
+| `metallb/helm-values.yaml` | + priorityClassName |
+| `treaefik/*/helm-values.yaml` | + priorityClassName |
+| `keycloak/bitnami/bitnami-helm-values.yaml` | + priorityClassName |
+| `jenkins/helm-values.yaml` | + priorityClassName |
+
+---
+
 # Descrizione dell'Infrastruttura Kubernetes
 
 ## 1. Cluster Overview

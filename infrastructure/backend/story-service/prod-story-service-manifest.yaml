@@ -13,6 +13,16 @@ spec:
       labels:
         app: story-service
     spec:
+      priorityClassName: application-standard
+      # Init container: wait for PostgreSQL before starting
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command: ['sh', '/scripts/wait-for-postgres.sh']
+          args: ['postgres.database.svc.cluster.local', '5432', '300']
+          volumeMounts:
+            - name: wait-scripts
+              mountPath: /scripts
       containers:
         - name: story-service
           image: fileini/story-service:latest
@@ -26,6 +36,36 @@ spec:
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+          # Probes for Spring Boot Actuator
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30  # 30 * 5s = 150s max startup
+      volumes:
+        - name: wait-scripts
+          configMap:
+            name: wait-scripts
+            defaultMode: 0755
 ---
 apiVersion: v1
 kind: Service

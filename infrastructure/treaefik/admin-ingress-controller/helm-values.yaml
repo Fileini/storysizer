@@ -1,3 +1,6 @@
+# Startup ordering: Traefik must start after MetalLB
+priorityclassname: system-cluster-critical
+
 deployment:
   kind: DaemonSet
   labels:

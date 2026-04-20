@@ -1,4 +1,9 @@
+# Startup ordering: MetalLB must start first for LoadBalancer IPs
+controller:
+  priorityClassName: system-cluster-critical
+
 speaker:
+  priorityClassName: system-cluster-critical
   securityContext:
     privileged: true
     capabilities:

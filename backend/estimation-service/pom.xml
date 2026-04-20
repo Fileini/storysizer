@@ -55,6 +55,12 @@
         <version>2.0.2</version>
     </dependency>
 
+    <!-- Spring Boot Actuator (health probes for Kubernetes) -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
 	<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-test -->
 	<dependency>
 		<groupId>org.springframework.boot</groupId>

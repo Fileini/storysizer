@@ -1,0 +1,30 @@
+# PriorityClasses for bare-metal startup ordering
+# Apply first: kubectl apply -f priority-classes.yaml
+#
+# Existing k3s classes (DO NOT recreate):
+# - system-node-critical: 2000001000
+# - system-cluster-critical: 2000000000
+#
+# Custom classes for StorySizer:
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: infrastructure-critical
+  labels:
+    app.kubernetes.io/part-of: storysizer
+description: "For infrastructure components: databases, auth, cert-manager"
+value: 1000000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: application-standard
+  labels:
+    app.kubernetes.io/part-of: storysizer
+description: "For application workloads: backend services, frontend, gateway"
+value: 100
+preemptionPolicy: PreemptLowerPriority
+globalDefault: true  # Default for all pods without explicit priorityClassName

@@ -1,0 +1,22 @@
+# Jenkins Helm values for StorySizer
+# Install: helm upgrade --install jenkins jenkins/jenkins -n jenkins -f helm-values.yaml
+#
+# Startup ordering: Jenkins can start after Traefik is up (no auth dependency)
+# priorityClassName not critical since Jenkins is CI/CD, not user-facing
+USER-SUPPLIED VALUES:
+controller:
+  priorityClassName: application-standard
+  additionalPlugins: []
+  installLatestPlugins: true
+  installPlugins:
+  - workflow-aggregator
+  - pipeline-model-definition
+  - git
+  - git-client
+  - kubernetes
+  - docker-workflow
+  - docker-commons
+  - credentials
+  - credentials-binding
+  numExecutors: 1
+  overwritePlugins: true
