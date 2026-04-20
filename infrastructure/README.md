@@ -1,43 +1,105 @@
+# Infrastructure
 
-#  Diagramma dell'Infrastruttura
+Questa cartella contiene tutti i manifesti Kubernetes e i Helm values per il cluster k3s di produzione (`fraserver`).
 
-![Alt text here](../docs/infrastructure-diagram/storysizerinfrastructure.drawio.svg)
+## Struttura
+
+```
+infrastructure/
+├── priority-classes.yaml          # PriorityClasses per lo scheduling
+├── apply-in-order.sh              # Script disaster recovery
+├── common/
+│   └── wait-scripts-configmap.yaml  # Script di wait per init containers
+├── metallb/                       # Helm values MetalLB
+├── treaefik/                      # Helm values Traefik (admin + public)
+├── certmanager/                   # Manifesti cert-manager
+├── keycloak/                      # Helm values + ingress Keycloak
+├── database/                      # Manifesto PostgreSQL microservizi
+├── backend/                       # Manifesti story-service, estimation-service, gateway
+├── frontend/                      # Manifesto frontend Flutter Web
+├── cloudflare/                    # Manifesto cloudflared tunnel
+└── jenkins/                       # Helm values Jenkins
+```
+
+## Cluster Overview
+
+- **Tipo**: k3s single-node bare metal
+- **Nodo**: `fraserver` (192.168.1.6)
+- **Traefik Admin**: LoadBalancer su 192.168.1.30 — traffico LAN interno
+- **Traefik Public**: ClusterIP — raggiunto da cloudflared per traffico Internet
+- **MetalLB**: pool IP 192.168.1.6–192.168.1.50
+
+## Namespaces
+
+| Namespace | Contenuto |
+|-----------|-----------|
+| `metallb-system` | MetalLB controller + speaker |
+| `ingress` | Traefik Admin + Traefik Public |
+| `cert-manager` | cert-manager |
+| `auth` | Keycloak + PostgreSQL interno |
+| `database` | PostgreSQL condiviso per i microservizi |
+| `service-prod` | story-service, estimation-service, gateway-service |
+| `frontend-prod` | storysizer-web (Flutter/Nginx) |
+| `cloudflared` | Cloudflare Tunnel |
+| `jenkins` | Jenkins CI/CD |
+
+---
 
 # Startup Ordering (Bare Metal)
 
-Il cluster k3s su bare metal richiede un ordine di avvio corretto dopo un reboot. Questo è gestito automaticamente tramite:
+Dopo un reboot del nodo, i servizi devono avviarsi in ordine. Il meccanismo è:
 
-1. **PriorityClasses** - Garantiscono che i componenti critici vengano schedulati prima
-2. **Init Containers** - I servizi aspettano le loro dipendenze prima di avviarsi
-3. **Readiness Probes** - Kubernetes non invia traffico a pod non pronti
+1. **PriorityClasses** — schedulano i pod critici prima degli altri
+2. **Init Containers** — i servizi attendono le dipendenze prima di avviarsi
+3. **Readiness/Liveness/Startup Probes** — Kubernetes gestisce traffico e restart
 
-## Ordine di Avvio
+## Catena di Dipendenze
 
 ```
-1. MetalLB (system-cluster-critical)
-   ↓
-2. Traefik Admin + Public (system-cluster-critical)
-   ↓
-3. cert-manager
-   ↓
-4. PostgreSQL microservices (infrastructure-critical)
-   ↓
-5. Keycloak (infrastructure-critical)
-   ↓
-6. Jenkins (application-standard, parallelo)
-   ↓
-7. story-service, estimation-service (aspettano PostgreSQL)
-   ↓
-8. gateway-service (aspetta Keycloak OIDC)
-   ↓
-9. cloudflared (aspetta Traefik public)
-   ↓
-10. Frontend (nessuna dipendenza bloccante)
+MetalLB (system-cluster-critical)
+  ↓
+Traefik Admin + Public (system-cluster-critical)
+  ↓
+cert-manager
+  ↓
+PostgreSQL microservizi (infrastructure-critical)
+  ↓
+Keycloak (infrastructure-critical)
+  ↓
+Jenkins (application-standard) ──────────────────┐
+story-service (attende postgres via init container) │ paralleli
+estimation-service (attende postgres)              │
+gateway-service (attende Keycloak OIDC)            │
+  ↓                                                │
+cloudflared (attende traefik-public:443)           │
+  ↓                                                │
+Frontend (nessuna dipendenza bloccante) ◄──────────┘
 ```
 
-## Applicazione Manuale (Disaster Recovery)
+## PriorityClasses Definite
 
-Se necessario riapplicare tutto in ordine:
+| Nome | Valore | Usato da |
+|------|--------|---------|
+| `system-cluster-critical` | 2000000000 | (built-in k8s) MetalLB, Traefik |
+| `infrastructure-critical` | 1000000 | PostgreSQL, Keycloak |
+| `application-standard` | 100 (default) | Tutti gli altri |
+
+## Init Containers
+
+| Pod | Init Container | Attende |
+|-----|---------------|---------|
+| story-service | `wait-for-postgres` | `postgres.database:5432` (TCP) |
+| estimation-service | `wait-for-postgres` | `postgres.database:5432` (TCP) |
+| gateway-service | `wait-for-keycloak` | `https://auth.storysizer.org/realms/storysizer/.well-known/openid-configuration` |
+| cloudflared | `wait-for-tcp` | `traefik-public.ingress:443` (TCP) |
+
+Gli script sono nel ConfigMap `wait-scripts` nei rispettivi namespace (database, service-prod, cloudflared).
+
+---
+
+# Disaster Recovery
+
+Se è necessario riapplicare tutto da zero in ordine:
 
 ```bash
 cd infrastructure/
@@ -46,155 +108,62 @@ cd infrastructure/
 ./apply-in-order.sh --skip-helm  # Salta gli upgrade Helm
 ```
 
-## Verifica Startup
+## Comandi Utili
 
 ```bash
-# Verifica PriorityClasses
+# Stato generale
+kubectl get pods -A
 kubectl get priorityclass
 
-# Verifica stato pod
-kubectl get pods -A | grep -E 'metallb|traefik|keycloak|postgres|jenkins|gateway|story|estimation|frontend|cloudflare'
+# Verifica che i pod abbiano la priorityClass giusta
+kubectl get pod <nome> -n <ns> -o jsonpath='{.spec.priorityClassName}'
 
-# Se un pod è bloccato in Init, controlla i log dell'init container
-kubectl logs <pod-name> -c wait-for-postgres -n <namespace>
-kubectl logs <pod-name> -c wait-for-keycloak -n <namespace>
+# Debug init container bloccato
+kubectl logs <pod> -c wait-for-postgres -n service-prod
+kubectl logs <pod> -c wait-for-keycloak -n service-prod
+
+# Stato rollout
+kubectl rollout status deployment/<nome> -n <namespace>
+
+# Helm releases
+helm list -A
 ```
 
-## File Modificati per Startup Ordering
+## Helm Upgrades
 
-| File | Modifiche |
-|------|-----------|
-| `priority-classes.yaml` | Definisce infrastructure-critical e application-standard |
-| `common/wait-scripts-configmap.yaml` | Script di wait per init containers |
-| `backend/*/prod-*-manifest.yaml` | + initContainers, + probes, + priorityClassName |
-| `database/microservices-postgres.yaml` | + probes, + priorityClassName |
-| `cloudflare/cloudflared-deploy.yaml` | + initContainers, + probes |
-| `frontend/prod-frontend-manifest.yaml` | + probes, + priorityClassName |
-| `metallb/helm-values.yaml` | + priorityClassName |
-| `treaefik/*/helm-values.yaml` | + priorityClassName |
-| `keycloak/bitnami/bitnami-helm-values.yaml` | + priorityClassName |
-| `jenkins/helm-values.yaml` | + priorityClassName |
+Per aggiungere la priorityClass a un componente Helm senza toccare la config:
 
----
+```bash
+# MetalLB
+helm upgrade metallb metallb/metallb -n metallb-system --version 0.14.9 --reuse-values \
+  --set controller.priorityClassName=system-cluster-critical \
+  --set speaker.priorityClassName=system-cluster-critical
 
-# Descrizione dell'Infrastruttura Kubernetes
+# Traefik
+helm upgrade traefik-admin traefik/traefik -n ingress --version 34.3.0 --reuse-values \
+  --set priorityClassName=system-cluster-critical
 
-## 1. Cluster Overview
+# Keycloak
+helm upgrade keycloak bitnami/keycloak -n auth --version 25.2.0 --reuse-values \
+  --set priorityClassName=infrastructure-critical
 
-- **Kubernetes Cluster**: Basato su **k3s**, con un **nodo master** connesso a Internet.
-- **Ingress Controller (Traefik Admin)**: Installato nel namespace `kube-system` e configurato per essere accessibile all'IP `192.168.1.30`. Questo controller gestisce l'instradamento del traffico in ingresso verso le varie applicazioni tramite le relative **Ingress Route**.
-- **Ingress Controller (Traefik Public)**: Installato nel namespace `kube-system` e configurato per essere accessibile all'IP `192.168.1.31`. Questo controller gestisce l'instradamento del traffico in ingresso verso le varie applicazioni tramite le relative **Ingress Route**.
-- **MetalLB**: Installato nel namespace `metallb-system` per la gestione degli IP esterni. MetalLB abilita l'esposizione dei servizi di tipo **LoadBalancer** nel cluster.
+# Jenkins
+helm upgrade jenkins jenkins/jenkins -n jenkins --version 5.8.10 --reuse-values \
+  --set controller.priorityClassName=application-standard
+```
 
 ---
 
-## 2. Componenti di MetalLB
+# Componenti Dettaglio
 
-- **Namespace**: `metallb-system`
-- **Componenti**:
-  - **Controller**: 
-  - **Speaker**: 
-  - **Webhook Service**: 
+Vedi le sottocartelle per i dettagli di ogni componente:
 
----
-
-## 3. Namespace e Servizi
-
-### 3.1. Namespace: `auth` (Gestione Autenticazione)
-
-- **Keycloak**:
-  - **StatefulSet**: `keycloak` (gestisce l'applicazione Keycloak).
-  - **Database Postgres**: StatefulSet `keycloak-postgres` con un PVC dedicato per la persistenza dei dati.
-- **Servizi**:
-  - **Keycloak Service** (ClusterIP): Espone Keycloak internamente.
-  - **Keycloak Headless Service** (ClusterIP): Per esigenze di service discovery.
-  - **Keycloak Postgresql Service** (ClusterIP): Per il database.
-- **Ingress**:
-  - Route configurata su `keycloak.cluster.local` per permettere l'accesso esterno a Keycloak.
-- **Sicurezza**:
-  - Viene utilizzato un **Secret** per gestire le credenziali e le chiavi necessarie.
-
----
-
-### 3.2. Namespace: `frontend-dev` (Frontend e Ambiente di Sviluppo)
-
-- **Flutter Development Environment (DevEnv)**:
-  - **Deployment** e **Pod**: `flutter-devenv`.
-  - **Service LoadBalancer**:  
-    - Esposto all'IP `192.168.1.36` sulla porta **22**.  
-    - **Collegamento diretto**: Il **Developer** si collega a questo service per accedere all'ambiente di sviluppo.
-  
-- **Storysizer-web (Applicazione Web)**:
-  - **Deployment** e **Pod**: `storysizer-web`.
-  - **Service ClusterIP**: Espone l'applicazione internamente.
-  - **Ingress**:
-    - Route configurata su `storysizer.cluster.local` per instradare il traffico verso la web app.
-
----
-
-### 3.3. Namespace: `service-dev` (Microservizi Spring Boot)
-
-All'interno di questo namespace sono presenti due microservizi, ciascuno esposto tramite un Service di tipo ClusterIP e accessibile tramite una specifica Ingress Route.
-
-- **Microservizio "story"**:
-  - **Deployment** e **Pod**: `story`.
-  - **ConfigMap**: Specifica per la configurazione del microservizio.
-  - **Service ClusterIP**: Espone il microservizio internamente.
-  - **Ingress**:
-    - Route configurata su `api.cluster.local/story`.
-  - **Autenticazione**:  
-    - Il **Pod** del microservizio si collega al **Keycloak Service** per la gestione dell'autenticazione.
-
-- **Microservizio "estimation"**:
-  - **Deployment** e **Pod**: `estimation`.
-  - **ConfigMap**: Specifica per la configurazione del microservizio.
-  - **Service ClusterIP**: Espone il microservizio internamente.
-  - **Ingress**:
-    - Route configurata su `api.cluster.local/estimation`.
-  - **Autenticazione**:  
-    - Il **Pod** si collega al **Keycloak Service** per l'autenticazione.
-
-- **Database Condiviso (Postgres)**:
-  - Utilizzato da entrambi i microservizi (`story` ed `estimation`).
-  - **Pod**: Esegue il database Postgres (indicato come `storysizer`).
-  - **Persistent Volume Claim (PVC)**: Garantisce la persistenza dei dati.
-  - **Connessioni**:
-    - La connessione al database parte dai **Pod** dei microservizi.
-
----
-
-### 3.4. Namespace: `jenkins`
-
-- **Jenkins**:
-  - **Deployment** e **Pod**: `jenkins`.
-  - **Service ClusterIP**: Espone Jenkins internamente.
-  - **Ingress**:
-    - Route configurata su `jenkins.cluster.local` per permettere l’accesso esterno all’interfaccia di Jenkins.
-
----
-
-## 4. Connessioni Esterne e Flusso del Traffico
-
-- **Ingress Controller (Traefik)**:
-  - Situato nel namespace `kube-system`, accoglie il traffico esterno all'indirizzo IP `192.168.1.30`.
-  - Instrada il traffico verso le rispettive **Ingress**:
-    - `keycloak.cluster.local`
-    - `storysizer.cluster.local`
-    - `api.cluster.local/story` e `api.cluster.local/estimation`
-    - `jenkins.cluster.local`
-
-- **Developer**:
-  - Il **Developer** si collega direttamente al servizio LoadBalancer del Flutter DevEnv (IP `192.168.1.36`, porta **22**).
-
-- **Utenti Esterni**:
-  - Si collegano all'Ingress Controller, che instrada il traffico verso le applicazioni appropriate.
-
-- **Microservizi**:
-  - Il traffico verso ciascun microservizio segue questa catena:
-    - **Ingress → Service (ClusterIP) → Pod → Deployment**
-  - I **Pod** dei microservizi si collegano al **Keycloak Service** per l'autenticazione e al **Database Postgres** per la persistenza dei dati.
-
----
-
-
-
+- [metallb/](metallb/) — IP pool e Helm values MetalLB
+- [treaefik/](treaefik/) — Configurazione Traefik Admin e Public
+- [keycloak/](keycloak/) — Keycloak Bitnami, ingress, secret
+- [database/](database/) — PostgreSQL per i microservizi
+- [backend/](backend/) — Manifesti story-service, estimation-service, gateway
+- [frontend/](frontend/) — Manifesto storysizer-web
+- [cloudflare/](cloudflare/) — Cloudflare Tunnel
+- [jenkins/](jenkins/) — Jenkins Helm values
+- [certmanager/](certmanager/) — Certificati TLS
