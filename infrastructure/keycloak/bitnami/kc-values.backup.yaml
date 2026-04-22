@@ -23,8 +23,8 @@ auth:
   adminPassword: ""
   adminUser: user
   annotations: {}
-  existingSecret: ""
-  passwordSecretKey: ""
+  existingSecret: keycloak-creds
+  passwordSecretKey: password
 customCaExistingSecret: ""
 httpRelativePath: /
 image:

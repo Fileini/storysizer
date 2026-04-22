@@ -26,9 +26,8 @@ httpRelativePath: "/"
 postgresql:
   enabled: true
   auth:
-    postgresPassword: REDACTED_ADMIN_PASSWORD   # superuser postgres
+    existingSecret: keycloak-postgresql
     username: bn_keycloak              # utente usato da Keycloak
-    password: REDACTED_DB_PASSWORD        # password utente Keycloak
     database: bitnami_keycloak
 
 ingress:
@@ -73,7 +72,10 @@ extraEnvVars:
   - name: KC_DB_USERNAME
     value: "bn_keycloak"
   - name: KC_DB_PASSWORD
-    value: "REDACTED_DB_PASSWORD"
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-postgresql
+        key: password
   - name: KC_HOSTNAME
     value: "https://auth.storysizer.org"
   - name: KC_HOSTNAME_ADMIN

@@ -51,4 +51,4 @@ Host flutter-dev
 
 - Questo ambiente è pensato per sviluppo/test, non per produzione.
 - Il namespace `frontend-dev` può contenere anche una versione di sviluppo del frontend.
-- La password SSH di default the configured SSH password va cambiata o sostituita con chiave pubblica.
+- La password SSH deve essere impostata tramite variabile di build o sostituita con chiave pubblica.

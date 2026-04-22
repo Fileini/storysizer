@@ -45,11 +45,20 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  name: microservices-postgres-secret
+                  key: username
             - name: POSTGRES_PASSWORD
-              value: "password"
+              valueFrom:
+                secretKeyRef:
+                  name: microservices-postgres-secret
+                  key: password
             - name: POSTGRES_DB
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: microservices-postgres-secret
+                  key: database
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgres-storage
@@ -57,9 +66,9 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - admin
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER"
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
@@ -67,9 +76,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - admin
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -77,9 +86,9 @@ spec:
           startupProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - admin
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER"
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

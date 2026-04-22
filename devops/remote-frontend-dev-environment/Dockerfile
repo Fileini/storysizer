@@ -18,6 +18,8 @@ RUN mkdir /var/run/sshd && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
     sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
+ARG DEV_SSH_PASSWORD=CHANGE_ME
+
 RUN useradd -m -s /bin/bash dev && \
     echo "dev:${DEV_SSH_PASSWORD}" | chpasswd && \
     echo "dev ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
