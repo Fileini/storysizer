@@ -45,8 +45,8 @@ server:
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.security: WARN
+    org.springframework.web: WARN
 
 # Actuator endpoints for Kubernetes health probes
 management:

@@ -3,6 +3,7 @@ directive @key(fields: String!) on OBJECT | INTERFACE
 type Query {
   stories: [Story]
   estimations: [Estimation]
+  exportMyData: UserData
 }
 
 type Mutation {
@@ -18,17 +19,16 @@ type Mutation {
   ): Estimation
   deleteStory(id: ID!): Boolean
   deleteEstimation(id: ID!): Boolean
+  deleteMyAccount: Boolean
 }
 
 type Story @key(fields: "id") {
   id: ID!
   name: String!
-  owner: String!
 }
 
 type Estimation @key(fields: "id") {
   id: ID!
-  owner: String!
   complexity: Int!
   reach: Int!
   story: Story!
@@ -36,4 +36,9 @@ type Estimation @key(fields: "id") {
   risk: Int!
   interaction: Int!
   sizer: Int
+}
+
+type UserData {
+  stories: [Story]!
+  estimations: [Estimation]!
 }

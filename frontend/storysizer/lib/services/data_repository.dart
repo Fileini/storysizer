@@ -13,7 +13,6 @@ class DataRepository {
         stories {
           id
           name
-          owner
         }
       }
     ''';
@@ -23,7 +22,6 @@ class DataRepository {
     if(result.hasException) {
       throw Exception(result.exception.toString());
     }
-    print("Risposta API: ${result.data}");
 
     final List storiesData = result.data?['stories'] ?? [];
     return storiesData.map((story) => Story.fromJson(story)).toList();
@@ -35,7 +33,6 @@ class DataRepository {
       query GetEstimations {
         estimations {
           id
-          owner
           complexity
           reach
           dimensions
@@ -45,7 +42,6 @@ class DataRepository {
           story {
             id
             name
-            owner
           }
         }
       }
@@ -58,7 +54,6 @@ class DataRepository {
     }
     
     final List estimationsData = result.data?['estimations'] ?? [];
-    print("DEBUG raw estimationsData = $estimationsData");
     return estimationsData.map((e) => Estimation.fromJson(e)).toList();
 
   }
@@ -70,7 +65,6 @@ class DataRepository {
         createStory(name: $name) {
           id
           name
-          owner
         }
       }
     ''';
@@ -119,7 +113,6 @@ class DataRepository {
           storyId: $storyId
         ) {
           id
-          owner
           complexity
           reach
           dimensions
@@ -129,7 +122,6 @@ class DataRepository {
           story {
             id
             name
-            owner
           }
         }
       }
@@ -178,6 +170,62 @@ class DataRepository {
     
     return result.data!['deleteStory'] as bool;
   }
-  
 
+  // Cancella l'account e tutti i dati dell'utente (GDPR - diritto alla cancellazione)
+  Future<bool> deleteMyAccount() async {
+    const String mutation = r'''
+      mutation DeleteMyAccount {
+        deleteMyAccount
+      }
+    ''';
+
+    final result = await client.mutate(
+      MutationOptions(document: gql(mutation)),
+    );
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    return result.data!['deleteMyAccount'] as bool;
+  }
+
+  // Esporta tutti i dati dell'utente (GDPR - diritto alla portabilità)
+  Future<Map<String, dynamic>> exportMyData() async {
+    const String query = r'''
+      query ExportMyData {
+        exportMyData {
+          stories {
+            id
+            name
+          }
+          estimations {
+            id
+            complexity
+            reach
+            dimensions
+            risk
+            interaction
+            sizer
+            story {
+              id
+              name
+            }
+          }
+        }
+      }
+    ''';
+
+    final result = await client.query(QueryOptions(
+      document: gql(query),
+      fetchPolicy: FetchPolicy.networkOnly,
+    ));
+
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    return result.data!['exportMyData'] as Map<String, dynamic>;
+  }
 }
+

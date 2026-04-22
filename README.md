@@ -91,4 +91,3 @@ Il deploy avviene tramite pipeline Jenkins (vedi [devops/README.md](devops/READM
 4. Fare `kubectl rollout restart` o usare il deploy pipeline
 
 Per l'infrastruttura Kubernetes vedi [infrastructure/README.md](infrastructure/README.md).
-
