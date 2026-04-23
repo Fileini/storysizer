@@ -116,6 +116,13 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Security headers (Cloudflare terminates TLS; HSTS must be present so
+    # browsers in incognito don't display "Not Secure" for non-HSTS hosts)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
     # WASM files with correct MIME type
     location ~* \\.wasm$ {
         default_type application/wasm;
