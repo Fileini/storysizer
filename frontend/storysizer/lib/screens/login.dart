@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'dart:html' as html; // per aprire i link su Flutter Web
 
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import '../services/auth_service.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -80,28 +79,30 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (context) {
-      final loginInfo = AuthService.instance.loginInfo;
-
-      return Center(
-        child: loginInfo.isInitialized
-            ? SizedBox(
-                width: 250,
-                height: 50,
-                child: SignInButton(
-                  Buttons.google,
-                  clipBehavior: Clip.hardEdge,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  onPressed: () {
-                    AuthService.instance.login();
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+    final loginInfo = AuthService.instance.loginInfo;
+    return ListenableBuilder(
+      listenable: loginInfo,
+      builder: (context, _) {
+        return Center(
+          child: loginInfo.isInitialized
+              ? SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: SignInButton(
+                    Buttons.google,
+                    clipBehavior: Clip.hardEdge,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    onPressed: () {
+                      AuthService.instance.login();
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-              )
-            : const CircularProgressIndicator(),
-      );
-    });
+                )
+              : const CircularProgressIndicator(),
+        );
+      },
+    );
   }
 }
