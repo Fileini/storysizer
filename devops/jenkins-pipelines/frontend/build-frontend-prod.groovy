@@ -60,6 +60,15 @@ spec:
                       cd frontend/storysizer
                       flutter pub get
                       flutter build web --release
+
+                      # Disable service worker entirely (we manage cache via Cache-Control headers)
+                      rm -f build/web/flutter_service_worker.js
+
+                      # Inject build version into index.html
+                      GIT_SHA=$(git -C ../.. rev-parse --short HEAD 2>/dev/null || echo "unknown")
+                      BUILD_VERSION="${BUILD_NUMBER:-local}-${GIT_SHA}-$(date -u +%Y%m%d%H%M)"
+                      sed -i "s|__BUILD_VERSION__|${BUILD_VERSION}|g" build/web/index.html
+                      echo "Injected build version: ${BUILD_VERSION}"
                     '''
                 }
                 stash name: 'flutter-build', includes: 'frontend/storysizer/build/web/**,frontend/storysizer/build/web/*'
@@ -98,13 +107,6 @@ spec:
                 sh '''
   mkdir -p docker-context
   cp -r frontend/storysizer/build/web docker-context/
-
-  # Sanity check: flutter_service_worker.js must be present
-  if [ ! -f docker-context/web/flutter_service_worker.js ]; then
-    echo "ERROR: flutter_service_worker.js missing from build output"
-    ls -la docker-context/web/
-    exit 1
-  fi
 
   # Creazione del file di configurazione minimal per Nginx
   cat <<'EOF' > docker-context/default.conf

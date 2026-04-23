@@ -114,6 +114,25 @@
   })();
   </script>
   
+  <!-- Disable Flutter service worker to avoid stale-cache issues -->
+  <script>
+    (function() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(r) { r.unregister(); });
+        }).catch(function(){});
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            names.forEach(function(n) { caches.delete(n); });
+          }).catch(function(){});
+        }
+      }
+    })();
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <!-- Build version indicator (replaced by Jenkins at build time) -->
+  <div id="build-version" style="position:fixed;bottom:4px;right:6px;font:10px/1 monospace;color:#888;opacity:0.6;pointer-events:none;z-index:9999;user-select:none;">build __BUILD_VERSION__</div>
 </body>
 </html>
