@@ -62,7 +62,7 @@ spec:
                       flutter build web --release
                     '''
                 }
-                stash name: 'flutter-build', includes: 'frontend/storysizer/build/web/**'
+                stash name: 'flutter-build', includes: 'frontend/storysizer/build/web/**,frontend/storysizer/build/web/*'
             }
         }
     
@@ -98,7 +98,14 @@ spec:
                 sh '''
   mkdir -p docker-context
   cp -r frontend/storysizer/build/web docker-context/
-  
+
+  # Sanity check: flutter_service_worker.js must be present
+  if [ ! -f docker-context/web/flutter_service_worker.js ]; then
+    echo "ERROR: flutter_service_worker.js missing from build output"
+    ls -la docker-context/web/
+    exit 1
+  fi
+
   # Creazione del file di configurazione minimal per Nginx
   cat <<'EOF' > docker-context/default.conf
 server {
