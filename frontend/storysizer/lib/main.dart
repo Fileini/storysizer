@@ -42,7 +42,12 @@ Future<void> main() async {
         }
       };
 
-      await AuthService.instance.init();
+      // Fire-and-forget: do NOT block app startup on Keycloak init.
+      // The LoginScreen reacts to LoginInfo state (loading / error / ready).
+      // If init() awaited here hangs (e.g. 3p-cookies blocked), the UI would
+      // never mount and users would only see the index.html spinner.
+      // ignore: discarded_futures
+      AuthService.instance.init();
 
       await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp],);
 
