@@ -56,6 +56,9 @@ class AuthService {
   initOptions: KeycloakInitOptions(
     onLoad: 'check-sso',
     responseMode: 'query',
+    // Disable the 3rd-party-cookie iframe check (broken in Chrome with 3PC blocked).
+    // Rely on silentCheckSsoRedirectUri (top-level navigation, no 3P cookies needed).
+    checkLoginIframe: false,
     // Must be an app-owned page on the same origin so postMessage can return to SPA.
     silentCheckSsoRedirectUri: 'https://app.storysizer.org/silent-check-sso.html',
   ),
