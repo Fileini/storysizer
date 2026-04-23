@@ -117,14 +117,14 @@ server {
     index index.html;
 
     # WASM files with correct MIME type
-    location ~* \.wasm$ {
+    location ~* \\.wasm$ {
         default_type application/wasm;
         try_files $uri =404;
     }
 
     # JS/CSS/JSON: serve file or 404 — NEVER fallback to index.html
     # Prevents nginx from serving HTML as JS (breaks service workers)
-    location ~* \.(js|css|json|map|woff2?|ttf|otf|ico|png|jpg|jpeg|gif|svg|webp)$ {
+    location ~* \\.(js|css|json|map|woff2?|ttf|otf|ico|png|jpg|jpeg|gif|svg|webp)$ {
         try_files $uri =404;
     }
 
