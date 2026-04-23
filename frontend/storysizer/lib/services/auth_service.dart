@@ -7,9 +7,11 @@ import 'package:keycloak_flutter/keycloak_flutter.dart';
 class LoginInfo extends ChangeNotifier {
   var _isInitialized = false;
   var _isLoggedIn = false;
+  String? _initError;
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isInitialized => _isInitialized;
+  String? get initError => _initError;
 
   set isInitialized(bool value) {
     _isInitialized = value;
@@ -18,6 +20,11 @@ class LoginInfo extends ChangeNotifier {
 
   set isLoggedIn(bool value) {
     _isLoggedIn = value;
+    notifyListeners();
+  }
+
+  set initError(String? value) {
+    _initError = value;
     notifyListeners();
   }
 }
@@ -52,31 +59,26 @@ class AuthService {
   Future<void> init() async {
     keycloak.keycloakEventsStream.listen((event) async => handleEvent(event));
 
-    // Race the keycloak.init against a hard timeout. Some browsers (Chrome with
-    // 3rd-party cookies disabled, or strict tracking protection) cause the
-    // 3p-cookies iframe to fail loading, which makes init() hang for ~10s
-    // before falling back. We unblock the UI after 4s so the login button
-    // shows up; silent SSO still works in the background where browsers allow it.
-    final initFuture = keycloak.init(
-      initOptions: KeycloakInitOptions(
-        onLoad: 'check-sso',
-        responseMode: 'query',
-        checkLoginIframe: false,
-        // Cap the wait for 3p-cookies probe (default is 10000ms).
-        messageReceiveTimeout: 3000,
-        // Top-level navigation page on same origin (no 3P cookies needed).
-        silentCheckSsoRedirectUri:
-            'https://app.storysizer.org/silent-check-sso.html',
-      ),
-    );
-
     try {
-      await initFuture.timeout(const Duration(seconds: 4));
-    } catch (e) {
-      // Init didn't complete in time (or threw). Show the UI anyway.
-      // ignore: avoid_print
-      print('Keycloak init timed out / failed: $e — proceeding without SSO check');
+      await keycloak
+          .init(
+            initOptions: KeycloakInitOptions(
+              onLoad: 'check-sso',
+              responseMode: 'query',
+              checkLoginIframe: false,
+              // Cap the wait for the 3p-cookies probe iframe (default 10s).
+              messageReceiveTimeout: 3000,
+              silentCheckSsoRedirectUri:
+                  'https://app.storysizer.org/silent-check-sso.html',
+            ),
+          )
+          .timeout(const Duration(seconds: 6));
+      // Some browsers may not fire onReady; ensure the flag is set on success.
       _loginInfo.isInitialized = true;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Keycloak init failed: $e');
+      _loginInfo.initError = e.toString();
     }
   }
 

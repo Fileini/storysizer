@@ -83,6 +83,36 @@ class LoginButton extends StatelessWidget {
     return ListenableBuilder(
       listenable: loginInfo,
       builder: (context, _) {
+        if (loginInfo.initError != null) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Authentication service unavailable',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    loginInfo.initError!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Reload'),
+                    onPressed: () => html.window.location.reload(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
         return Center(
           child: loginInfo.isInitialized
               ? SizedBox(
