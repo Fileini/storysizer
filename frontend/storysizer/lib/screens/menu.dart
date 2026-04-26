@@ -19,7 +19,7 @@ class _MenuScreenState extends State<MenuScreen> {
   final List<Map<String, dynamic>> menuItems = [
     {'icon': CupertinoIcons.bolt_circle_fill, 'title': 'Quick Size', 'index': 0},
     {'icon': CupertinoIcons.doc_plaintext, 'title': 'History', 'index': 1},
-    {'icon': CupertinoIcons.group_solid, 'title': 'Groups', 'index': 2},
+    {'icon': CupertinoIcons.group_solid, 'title': 'Group Estimation', 'index': 2},
   ];
 
   void _onItemTapped(int index) {
