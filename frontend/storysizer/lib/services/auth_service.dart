@@ -90,10 +90,9 @@ class AuthService {
   }
 
   Future<void> login({String? idpHint}) async {
-    keycloak.login(KeycloakLoginOptions(
-      redirectUri: Uri.base.origin,
-      idpHint: idpHint,
-    ));
+    final options = KeycloakLoginOptions(redirectUri: Uri.base.origin);
+    if (idpHint != null) options.idpHint = idpHint;
+    keycloak.login(options);
   }
 
   Future<void> logout() async {
