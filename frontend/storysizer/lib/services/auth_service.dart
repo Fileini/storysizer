@@ -1,4 +1,6 @@
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'package:flutter/foundation.dart' show ChangeNotifier, ValueNotifier, immutable;
 import 'package:keycloak_flutter/keycloak_flutter.dart';
 
@@ -58,6 +60,7 @@ class AuthService {
   AuthService._internal();
 
   Future<void> init() async {
+    _wipeStaleKeycloakStorage();
     keycloak.keycloakEventsStream.listen((event) async => handleEvent(event));
 
     try {
@@ -202,6 +205,41 @@ await keycloak.updateToken(60);
     logout();
     _keycloakProfile = null;
     _loginInfo.isLoggedIn = false;
+  }
+
+  /// Removes stale Keycloak entries from local/session storage left over from
+  /// previous app versions or aborted login flows. These leftovers can cause
+  /// `keycloak-js` to hang or fail in browsers like Safari (normal mode) where
+  /// ITP partitions cookies in iframes while leaving local storage populated.
+  ///
+  /// Only runs when the current URL is NOT an OAuth callback (no `code`,
+  /// `state` or `session_state` in the query/fragment), so we never break a
+  /// legitimate login redirect flow.
+  void _wipeStaleKeycloakStorage() {
+    try {
+      final uri = Uri.base;
+      final params = <String, String>{
+        ...uri.queryParameters,
+        ...Uri.splitQueryString(uri.fragment),
+      };
+      final isCallback = params.containsKey('code') ||
+          params.containsKey('state') ||
+          params.containsKey('session_state') ||
+          params.containsKey('error');
+      if (isCallback) return;
+
+      bool isKcKey(String? k) =>
+          k != null && (k.startsWith('kc-') || k.startsWith('keycloak'));
+
+      final ls = html.window.localStorage;
+      ls.keys.where(isKcKey).toList().forEach(ls.remove);
+
+      final ss = html.window.sessionStorage;
+      ss.keys.where(isKcKey).toList().forEach(ss.remove);
+    } catch (e) {
+      // ignore: avoid_print
+      print('Wipe stale Keycloak storage failed: $e');
+    }
   }
 
   /// -----------------------------------
