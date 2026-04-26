@@ -67,10 +67,15 @@ class AuthService {
               onLoad: 'check-sso',
               responseMode: 'query',
               checkLoginIframe: false,
-              // Cap the wait for the 3p-cookies probe iframe (default 10s).
+              // Keep init fast and deterministic across browsers/private modes.
               messageReceiveTimeout: 3000,
+              // Required for check-sso to stay silent (iframe flow).
               silentCheckSsoRedirectUri:
                   'https://app.storysizer.org/silent-check-sso.html',
+              // Safari private mode blocks 3p cookies; without this, Keycloak
+              // falls back to a top-level prompt=none redirect that can end on
+              // an invalid credentials page.
+              silentCheckSsoFallback: false,
             ),
           )
           .timeout(const Duration(seconds: 6));
