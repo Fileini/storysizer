@@ -14,7 +14,7 @@ kind: Pod
 spec:
   containers:
     - name: flutter
-      image: ghcr.io/cirruslabs/flutter:3.28.0
+      image: ghcr.io/cirruslabs/flutter:3.27.1
       command: ['cat']
       tty: true
 """
@@ -46,7 +46,7 @@ kind: Pod
 spec:
   containers:
     - name: flutter
-      image: ghcr.io/cirruslabs/flutter:3.28.0
+      image: ghcr.io/cirruslabs/flutter:3.27.1
       command: ['cat']
       tty: true
 """
