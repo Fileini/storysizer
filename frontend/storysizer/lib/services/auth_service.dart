@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart' show ChangeNotifier, ValueNotifier, immutable;
 import 'package:keycloak_flutter/keycloak_flutter.dart';
 
@@ -75,6 +76,12 @@ class AuthService {
           .timeout(const Duration(seconds: 6));
       // Some browsers may not fire onReady; ensure the flag is set on success.
       _loginInfo.isInitialized = true;
+      _loginInfo.initError = null;
+    } on TimeoutException catch (e) {
+      // If check-sso does not complete in time, keep the login UI usable.
+      print('Keycloak init timeout, continuing without SSO check: $e');
+      _loginInfo.initError = null;
+      _loginInfo.isInitialized = true;
     } catch (e) {
       // ignore: avoid_print
       print('Keycloak init failed: $e');
@@ -82,9 +89,10 @@ class AuthService {
     }
   }
 
-  Future<void> login() async {
+  Future<void> login({String? idpHint}) async {
     keycloak.login(KeycloakLoginOptions(
       redirectUri: Uri.base.origin,
+      idpHint: idpHint,
     ));
   }
 

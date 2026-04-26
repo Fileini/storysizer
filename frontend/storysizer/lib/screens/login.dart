@@ -12,61 +12,74 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(75),
-              child: Stack(
-                children: [
-                  Image.asset(
-                    "assets/logo.png",
-                    height: 150,
-                    width: 150,
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(75),
-                        border: Border.all(
-                          width: 5,
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(75),
+                  child: Stack(
+                    children: [
+                      Image.asset(
+                        "assets/logo.png",
+                        height: 150,
+                        width: 150,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(75),
+                            border: Border.all(
+                              width: 5,
+                            ),
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                Text(
+                  "StorySizer",
+                  style: Theme.of(context).textTheme.displayLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const LoginButton(),
+              ],
+            ),
+            // ToS + Privacy nell'angolo in basso a destra
+            Positioned(
+              right: 8,
+              bottom: 8,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      html.window.open(
+                          'https://storysizer.org/terms-of-use', '_blank');
+                    },
+                    child: const Text(
+                      "Terms of Service",
+                      style: TextStyle(fontSize: 11, color: Colors.blue),
+                    ),
+                  ),
+                  const Text("·",
+                      style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  TextButton(
+                    onPressed: () {
+                      html.window.open(
+                          'https://storysizer.org/privacy-policy', '_blank');
+                    },
+                    child: const Text(
+                      "Privacy Policy",
+                      style: TextStyle(fontSize: 11, color: Colors.blue),
                     ),
                   ),
                 ],
               ),
             ),
-            Text(
-              "StorySizer",
-              style: Theme.of(context).textTheme.displayLarge,
-              textAlign: TextAlign.center,
-            ),
-            // Sezione link Terms + Privacy
-            Column(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    html.window.open('/terms.html', '_blank');
-                  },
-                  child: const Text(
-                    "Terms of Service",
-                    style: TextStyle(fontSize: 12, color: Colors.blue),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    html.window.open('/privacy.html', '_blank');
-                  },
-                  child: const Text(
-                    "Privacy Policy",
-                    style: TextStyle(fontSize: 12, color: Colors.blue),
-                  ),
-                ),
-              ],
-            ),
-            const LoginButton(),
           ],
         ),
       ),
@@ -115,24 +128,59 @@ class LoginButton extends StatelessWidget {
         }
         return Center(
           child: loginInfo.isInitialized
-              ? SizedBox(
-                  width: 250,
-                  height: 50,
-                  child: SignInButton(
-                    Buttons.google,
-                    clipBehavior: Clip.hardEdge,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    onPressed: () {
-                      AuthService.instance.login();
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _IdpButton(
+                      type: Buttons.google,
+                      onPressed: () => AuthService.instance.login(idpHint: 'google'),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    _IdpButton(
+                      type: Buttons.gitHub,
+                      onPressed: () =>
+                          AuthService.instance.login(idpHint: 'github'),
+                    ),
+                    const SizedBox(height: 8),
+                    _IdpButton(
+                      type: Buttons.microsoft,
+                      onPressed: () =>
+                          AuthService.instance.login(idpHint: 'microsoft'),
+                    ),
+                    const SizedBox(height: 8),
+                    _IdpButton(
+                      type: Buttons.apple,
+                      onPressed: () =>
+                          AuthService.instance.login(idpHint: 'apple'),
+                    ),
+                  ],
                 )
               : const CircularProgressIndicator(),
         );
       },
+    );
+  }
+}
+
+class _IdpButton extends StatelessWidget {
+  final Buttons type;
+  final VoidCallback onPressed;
+  const _IdpButton({required this.type, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 250,
+      height: 40,
+      child: SignInButton(
+        type,
+        clipBehavior: Clip.hardEdge,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        onPressed: onPressed,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+      ),
     );
   }
 }
