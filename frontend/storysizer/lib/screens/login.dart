@@ -152,7 +152,7 @@ class LoginButton extends StatelessWidget {
                     const SizedBox(height: 8),
                     _IdpButton(
                       type: Buttons.apple,
-                      badgeLabel: 'coming later',
+                      glowColor: Colors.orange.withOpacity(0.35),
                       onPressed: () => context.go('/coming-soon/Apple'),
                     ),
                   ],
@@ -168,11 +168,13 @@ class _IdpButton extends StatelessWidget {
   final Buttons type;
   final VoidCallback onPressed;
   final String? badgeLabel;
+  final Color? glowColor;
 
   const _IdpButton({
     required this.type,
     required this.onPressed,
     this.badgeLabel,
+    this.glowColor,
   });
 
   @override
@@ -183,13 +185,27 @@ class _IdpButton extends StatelessWidget {
         SizedBox(
           width: 250,
           height: 40,
-          child: SignInButton(
-            type,
-            clipBehavior: Clip.hardEdge,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            onPressed: onPressed,
-            shape: RoundedRectangleBorder(
+          child: Container(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
+              boxShadow: glowColor == null
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: glowColor!,
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                    ],
+            ),
+            child: SignInButton(
+              type,
+              clipBehavior: Clip.hardEdge,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              onPressed: onPressed,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
           ),
         ),
