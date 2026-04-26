@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:html' as html; // per aprire i link su Flutter Web
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -132,14 +133,15 @@ class LoginButton extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _IdpButton(
-                      type: Buttons.google,
-                      onPressed: () => AuthService.instance.login(idpHint: 'google'),
-                    ),
-                    const SizedBox(height: 8),
-                    _IdpButton(
                       type: Buttons.gitHub,
                       onPressed: () =>
                           AuthService.instance.login(idpHint: 'github'),
+                    ),
+                    const SizedBox(height: 8),
+                    _IdpButton(
+                      type: Buttons.google,
+                      onPressed: () =>
+                          AuthService.instance.login(idpHint: 'google'),
                     ),
                     const SizedBox(height: 8),
                     _IdpButton(
@@ -150,8 +152,8 @@ class LoginButton extends StatelessWidget {
                     const SizedBox(height: 8),
                     _IdpButton(
                       type: Buttons.apple,
-                      onPressed: () =>
-                          AuthService.instance.login(idpHint: 'apple'),
+                      badgeLabel: 'coming later',
+                      onPressed: () => context.go('/coming-soon/Apple'),
                     ),
                   ],
                 )
@@ -165,22 +167,51 @@ class LoginButton extends StatelessWidget {
 class _IdpButton extends StatelessWidget {
   final Buttons type;
   final VoidCallback onPressed;
-  const _IdpButton({required this.type, required this.onPressed});
+  final String? badgeLabel;
+
+  const _IdpButton({
+    required this.type,
+    required this.onPressed,
+    this.badgeLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 250,
-      height: 40,
-      child: SignInButton(
-        type,
-        clipBehavior: Clip.hardEdge,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        onPressed: onPressed,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 250,
+          height: 40,
+          child: SignInButton(
+            type,
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            onPressed: onPressed,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
         ),
-      ),
+        if (badgeLabel != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade100,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              badgeLabel!,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.orange.shade900,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

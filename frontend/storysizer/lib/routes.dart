@@ -8,6 +8,7 @@ import 'package:storysizer/screens/profile.dart';
 import 'package:storysizer/screens/quick_sizer_name.dart';
 import 'package:storysizer/screens/quick_sizer_questions.dart';
 import 'package:storysizer/screens/estimation.dart';
+import 'package:storysizer/screens/coming_soon.dart';
 import 'package:storysizer/services/auth_service.dart';
 
 class StszRoutes {
@@ -94,6 +95,13 @@ class StszRoutes {
               ],
             ),
           ],
+          GoRoute(
+            name: 'coming-soon',
+            path: '/coming-soon/:feature',
+            builder: (context, state) => ComingSoonScreen(
+              feature: state.pathParameters['feature'] ?? 'This',
+            ),
+          ),
           errorBuilder: (context, state) {
             print("🚨 ERRORE NEL ROUTING! URL: ${state.uri}");
             return const ErrorScreen();
