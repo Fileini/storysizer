@@ -22,8 +22,10 @@ class StszRoutes {
             final loginInfo = AuthService.instance.loginInfo;
             if (!loginInfo.isInitialized) return null;
             final loc = state.matchedLocation;
-            // Don't interfere while the user is being logged out.
+            // Don't interfere while the user is being logged out or visiting
+            // public informational routes.
             if (loc == '/logging-out') return null;
+            if (loc.startsWith('/coming-soon')) return null;
             final loggedIn = loginInfo.isLoggedIn;
             final isLoggingIn = loc == '/';
             if (!loggedIn && !isLoggingIn) return '/';

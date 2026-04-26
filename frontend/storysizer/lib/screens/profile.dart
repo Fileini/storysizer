@@ -227,7 +227,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   context.go('/logging-out');
-                  AuthService.instance.logout();
+                  // Defer the actual logout so the /logging-out screen has
+                  // time to paint before Keycloak takes over the window.
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                    AuthService.instance.logout();
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(200, 20),

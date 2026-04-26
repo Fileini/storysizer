@@ -253,8 +253,8 @@ await keycloak.updateToken(60);
           return {
             "id": "N/A",
             "username": "Utente sconosciuto",
-            "firstName": "Utente sconosciuto",
-            "lastName": "Utente sconosciuto",
+            "firstName": "",
+            "lastName": "",
           };
         }
         _keycloakProfile = await keycloak.loadUserProfile(false);
@@ -263,8 +263,8 @@ await keycloak.updateToken(60);
       final userProfile = {
         "id": _keycloakProfile?.id ?? "N/A",
         "username": _keycloakProfile?.username ?? "Utente sconosciuto",
-        "firstName": _keycloakProfile?.firstName ?? "Utente sconosciuto",
-        "lastName": _keycloakProfile?.lastName ?? "Utente sconosciuto",
+        "firstName": _keycloakProfile?.firstName ?? "",
+        "lastName": _keycloakProfile?.lastName ?? "",
       };
 
       return userProfile;
@@ -273,8 +273,8 @@ await keycloak.updateToken(60);
       return {
         "id": "Errore",
         "username": "Errore nel caricamento",
-        "firstName": "Errore nel caricamento",
-        "lastName": "Errore nel caricamento",
+        "firstName": "",
+        "lastName": "",
       };
     }
   }
