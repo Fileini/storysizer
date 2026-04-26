@@ -51,7 +51,7 @@ class ComingSoonScreen extends StatelessWidget {
                   ),
                   icon: const Text('☕', style: TextStyle(fontSize: 18)),
                   label: const Text(
-                    'Buy me a coffee',
+                    'Support storysizer with a coffee',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 15),
                   ),
