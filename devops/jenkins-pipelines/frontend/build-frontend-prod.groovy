@@ -14,7 +14,7 @@ kind: Pod
 spec:
   containers:
     - name: flutter
-      image: ghcr.io/cirruslabs/flutter:3.27.1
+      image: ghcr.io/cirruslabs/flutter:3.28.0
       command: ['cat']
       tty: true
 """
@@ -46,7 +46,7 @@ kind: Pod
 spec:
   containers:
     - name: flutter
-      image: ghcr.io/cirruslabs/flutter:3.27.1
+      image: ghcr.io/cirruslabs/flutter:3.28.0
       command: ['cat']
       tty: true
 """
@@ -137,6 +137,9 @@ server {
 
     # Exact match for index.html
     location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
         try_files $uri =404;
     }
 
