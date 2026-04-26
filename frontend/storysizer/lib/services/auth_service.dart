@@ -105,7 +105,9 @@ class AuthService {
 
   Future<void> logout() async {
     try {
-      await keycloak.logout();
+      await keycloak.logout(KeycloakLogoutOptions(
+        redirectUri: Uri.base.origin,
+      ));
     } catch (e) {
       print("Errore logout: $e");
     }
