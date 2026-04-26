@@ -16,6 +16,17 @@ class StszRoutes {
 
   StszRoutes()
       : router = GoRouter(
+          refreshListenable: AuthService.instance.loginInfo,
+          redirect: (context, state) {
+            final loginInfo = AuthService.instance.loginInfo;
+            if (!loginInfo.isInitialized) return null;
+            final loggedIn = loginInfo.isLoggedIn;
+            final loc = state.matchedLocation;
+            final isLoggingIn = loc == '/';
+            if (!loggedIn && !isLoggingIn) return '/';
+            if (loggedIn && isLoggingIn) return '/home';
+            return null;
+          },
           routes: [
             GoRoute(
               name: 'login',
