@@ -47,6 +47,7 @@ class LoginScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const LoginButton(),
+                const SizedBox(height: 80),
               ],
             ),
             // ToS + Privacy nell'angolo in basso a destra
