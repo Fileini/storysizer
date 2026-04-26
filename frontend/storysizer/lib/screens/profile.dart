@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:storysizer/providers.dart';
 import 'package:storysizer/services/auth_service.dart';
@@ -130,6 +131,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
+              if (context.mounted) context.go('/logging-out');
               await _deleteAccount(context);
             },
             child: const Text('Delete everything'),
@@ -224,6 +226,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
               child: ElevatedButton(
                 onPressed: () {
+                  context.go('/logging-out');
                   AuthService.instance.logout();
                 },
                 style: ElevatedButton.styleFrom(

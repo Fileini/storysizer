@@ -9,6 +9,7 @@ import 'package:storysizer/screens/quick_sizer_name.dart';
 import 'package:storysizer/screens/quick_sizer_questions.dart';
 import 'package:storysizer/screens/estimation.dart';
 import 'package:storysizer/screens/coming_soon.dart';
+import 'package:storysizer/screens/logging_out.dart';
 import 'package:storysizer/services/auth_service.dart';
 
 class StszRoutes {
@@ -20,8 +21,10 @@ class StszRoutes {
           redirect: (context, state) {
             final loginInfo = AuthService.instance.loginInfo;
             if (!loginInfo.isInitialized) return null;
-            final loggedIn = loginInfo.isLoggedIn;
             final loc = state.matchedLocation;
+            // Don't interfere while the user is being logged out.
+            if (loc == '/logging-out') return null;
+            final loggedIn = loginInfo.isLoggedIn;
             final isLoggingIn = loc == '/';
             if (!loggedIn && !isLoggingIn) return '/';
             if (loggedIn && isLoggingIn) return '/home';
@@ -98,6 +101,11 @@ class StszRoutes {
               builder: (context, state) => ComingSoonScreen(
                 feature: state.pathParameters['feature'] ?? 'This',
               ),
+            ),
+            GoRoute(
+              name: 'logging-out',
+              path: '/logging-out',
+              builder: (context, state) => const LoggingOutScreen(),
             ),
           ],
           errorBuilder: (context, state) {
