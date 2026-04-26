@@ -16,21 +16,6 @@ class StszRoutes {
 
   StszRoutes()
       : router = GoRouter(
-          redirect: (BuildContext? context, GoRouterState state) {
-            final loggedIn = AuthService.instance.loginInfo.isLoggedIn;
-            final isLoggingIn = state.location == '/';
-
-            if (loggedIn == null) {
-              return null; // Non facciamo redirect se lo stato non è ancora determinato
-            }
-
-            if (!loggedIn && !isLoggingIn)
-              return '/'; // Se non loggato e non su '/', vai a login
-            if (loggedIn && isLoggingIn)
-              return '/home'; // Se loggato e su '/', vai a home
-
-            return null; // Nessun cambiamento
-          },
           routes: [
             GoRoute(
               name: 'login',
@@ -38,36 +23,35 @@ class StszRoutes {
               builder: (context, state) => const LoginScreen(),
             ),
             GoRoute(
-                  path: '/history',
-                  pageBuilder: (context, state) => _animatedPage(
-                    state: state,
-                    child: const MenuScreen(view: HistoryView()),
-                  ),
-                ),
-                GoRoute(
-                  path: '/groups',
-                  pageBuilder: (context, state) => _animatedPage(
-                    state: state,
-                    child: const MenuScreen(view: GroupsView()),
-                  ),
-                ),
-                GoRoute(
-                  path: '/profile',
-                  pageBuilder: (context, state) => _animatedPage(
-                    state: state,
-                    child: const MenuScreen(view: ProfileScreen()),
-                  ),
-                ),
+              path: '/history',
+              pageBuilder: (context, state) => _animatedPage(
+                state: state,
+                child: const MenuScreen(view: HistoryView()),
+              ),
+            ),
+            GoRoute(
+              path: '/groups',
+              pageBuilder: (context, state) => _animatedPage(
+                state: state,
+                child: const MenuScreen(view: GroupsView()),
+              ),
+            ),
+            GoRoute(
+              path: '/profile',
+              pageBuilder: (context, state) => _animatedPage(
+                state: state,
+                child: const MenuScreen(view: ProfileScreen()),
+              ),
+            ),
             GoRoute(
               name: 'home',
               path: '/home',
-              builder: (context, state) =>  MenuScreen(view: Builder(
+              builder: (context, state) => MenuScreen(view: Builder(
                 builder: (context) {
                   return NameInputScreen();
                 }
               )),
               routes: [
-                // 👇 Aggiungiamo le sotto-route
                 GoRoute(
                   path: 'sizer-name',
                   pageBuilder: (context, state) => _animatedPage(
@@ -76,29 +60,35 @@ class StszRoutes {
                   ),
                 ),
                 GoRoute(
-                    path: 'sizer-questions/:name',
-                    pageBuilder: (context, state) => _animatedPage(
-                        state: state,
-                        child: MenuScreen(
-                            view: QuickSizerQuestionsView(
-                                name: state.pathParameters['name']!)))),
+                  path: 'sizer-questions/:name',
+                  pageBuilder: (context, state) => _animatedPage(
+                    state: state,
+                    child: MenuScreen(
+                      view: QuickSizerQuestionsView(
+                        name: state.pathParameters['name']!
+                      )
+                    ),
+                  ),
+                ),
                 GoRoute(
                   path: 'estimation/:id',
                   pageBuilder: (context, state) => _animatedPage(
                     state: state,
-                    child: MenuScreen(view: EstimationView(id: state.pathParameters['id']!)),
+                    child: MenuScreen(
+                      view: EstimationView(id: state.pathParameters['id']!),
+                    ),
                   ),
-                ),                
+                ),
               ],
             ),
-          ],
-          GoRoute(
-            name: 'coming-soon',
-            path: '/coming-soon/:feature',
-            builder: (context, state) => ComingSoonScreen(
-              feature: state.pathParameters['feature'] ?? 'This',
+            GoRoute(
+              name: 'coming-soon',
+              path: '/coming-soon/:feature',
+              builder: (context, state) => ComingSoonScreen(
+                feature: state.pathParameters['feature'] ?? 'This',
+              ),
             ),
-          ),
+          ],
           errorBuilder: (context, state) {
             print("🚨 ERRORE NEL ROUTING! URL: ${state.uri}");
             return const ErrorScreen();
