@@ -44,6 +44,12 @@
 			<version>2.0.2</version>
 		</dependency>
 
+		<!-- Spring Security (permit-all, autenticazione delegata al gateway) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
 		<!-- Actuator (Kubernetes health probes) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
