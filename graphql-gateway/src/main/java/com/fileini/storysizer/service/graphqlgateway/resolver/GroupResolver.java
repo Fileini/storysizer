@@ -1,5 +1,12 @@
 package com.fileini.storysizer.service.graphqlgateway.resolver;
 
+import com.fileini.storysizer.service.graphqlgateway.model.GroupDetail;
+import com.fileini.storysizer.service.graphqlgateway.model.GroupEstimationDashboard;
+import com.fileini.storysizer.service.graphqlgateway.model.GroupEstimationItem;
+import com.fileini.storysizer.service.graphqlgateway.model.GroupEstimationVote;
+import com.fileini.storysizer.service.graphqlgateway.model.GroupInvitation;
+import com.fileini.storysizer.service.graphqlgateway.model.GroupMember;
+
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import org.springframework.core.ParameterizedTypeReference;
@@ -28,27 +35,24 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
 
     // ─── Queries ─────────────────────────────────────────────────────────────
 
-    public List<Map<String, Object>> myGroups() {
-        HttpEntity<Void> req = new HttpEntity<>(userHeaders());
-        ResponseEntity<List<Map<String, Object>>> resp = restTemplate.exchange(
-            BASE + "/groups/member", HttpMethod.GET, req,
-            new ParameterizedTypeReference<>() {});
-        return resp.getBody();
-    }
-
-    public Map<String, Object> group(String id) {
+    public List<GroupDetail> myGroups() {
         HttpEntity<Void> req = new HttpEntity<>(userHeaders());
         return restTemplate.exchange(
-            BASE + "/groups/" + id, HttpMethod.GET, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            BASE + "/groups/member", HttpMethod.GET, req,
+            new ParameterizedTypeReference<List<GroupDetail>>() {}).getBody();
     }
 
-    public List<Map<String, Object>> groupEstimations(String groupId) {
+    public GroupDetail group(String id) {
+        HttpEntity<Void> req = new HttpEntity<>(userHeaders());
+        return restTemplate.exchange(
+            BASE + "/groups/" + id, HttpMethod.GET, req, GroupDetail.class).getBody();
+    }
+
+    public List<GroupEstimationItem> groupEstimations(String groupId) {
         HttpEntity<Void> req = new HttpEntity<>(idOnlyHeaders());
-        ResponseEntity<List<Map<String, Object>>> resp = restTemplate.exchange(
+        return restTemplate.exchange(
             BASE + "/group-estimations/group/" + groupId, HttpMethod.GET, req,
-            new ParameterizedTypeReference<>() {});
-        return resp.getBody();
+            new ParameterizedTypeReference<List<GroupEstimationItem>>() {}).getBody();
     }
 
     public int myPendingGroupEstimationsCount() {
@@ -61,41 +65,39 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         return count == null ? 0 : ((Number) count).intValue();
     }
 
-    public List<Map<String, Object>> groupEstimationFeed() {
+    public List<GroupEstimationItem> groupEstimationFeed() {
         HttpEntity<Void> req = new HttpEntity<>(idOnlyHeaders());
-        ResponseEntity<List<Map<String, Object>>> resp = restTemplate.exchange(
+        return restTemplate.exchange(
             BASE + "/group-estimations/user/feed", HttpMethod.GET, req,
-            new ParameterizedTypeReference<>() {});
-        return resp.getBody();
+            new ParameterizedTypeReference<List<GroupEstimationItem>>() {}).getBody();
     }
 
-    public Map<String, Object> myVote(String groupEstimationId) {
+    public GroupEstimationVote myVote(String groupEstimationId) {
         HttpEntity<Void> req = new HttpEntity<>(idOnlyHeaders());
         return restTemplate.exchange(
             BASE + "/group-estimations/" + groupEstimationId + "/my-vote",
-            HttpMethod.GET, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            HttpMethod.GET, req, GroupEstimationVote.class).getBody();
     }
 
-    public Map<String, Object> groupEstimationDashboard(String groupEstimationId) {
+    public GroupEstimationDashboard groupEstimationDashboard(String groupEstimationId) {
         HttpEntity<Void> req = new HttpEntity<>(idOnlyHeaders());
         return restTemplate.exchange(
             BASE + "/group-estimations/" + groupEstimationId + "/dashboard",
-            HttpMethod.GET, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            HttpMethod.GET, req, GroupEstimationDashboard.class).getBody();
     }
 
     // ─── Group mutations ─────────────────────────────────────────────────────
 
-    public Map<String, Object> createGroup(String name) {
-        return post("/groups", Map.of("name", name), userHeaders());
+    public GroupDetail createGroup(String name) {
+        HttpEntity<Map<String, String>> req = new HttpEntity<>(Map.of("name", name), userHeaders());
+        return restTemplate.postForObject(BASE + "/groups", req, GroupDetail.class);
     }
 
-    public Map<String, Object> renameGroup(String groupId, String name) {
+    public GroupDetail renameGroup(String groupId, String name) {
         HttpEntity<Map<String, String>> req = new HttpEntity<>(Map.of("name", name), userHeaders());
         return restTemplate.exchange(
             BASE + "/groups/" + groupId + "/name", HttpMethod.PUT, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            GroupDetail.class).getBody();
     }
 
     public Boolean deleteGroup(String groupId) {
@@ -104,8 +106,10 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         return true;
     }
 
-    public Map<String, Object> inviteToGroup(String groupId, String email) {
-        return post("/groups/" + groupId + "/invitations", Map.of("email", email), userHeaders());
+    public GroupInvitation inviteToGroup(String groupId, String email) {
+        HttpEntity<Map<String, String>> req = new HttpEntity<>(Map.of("email", email), userHeaders());
+        return restTemplate.postForObject(
+            BASE + "/groups/" + groupId + "/invitations", req, GroupInvitation.class);
     }
 
     public Boolean cancelGroupInvite(String groupId, String invitationId) {
@@ -116,12 +120,11 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         return true;
     }
 
-    public Map<String, Object> promoteGroupMember(String groupId, String targetUserId) {
+    public GroupMember promoteGroupMember(String groupId, String targetUserId) {
         HttpEntity<Void> req = new HttpEntity<>(idOnlyHeaders());
         return restTemplate.exchange(
             BASE + "/groups/" + groupId + "/members/" + targetUserId + "/promote",
-            HttpMethod.POST, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            HttpMethod.POST, req, GroupMember.class).getBody();
     }
 
     public Boolean removeGroupMember(String groupId, String targetUserId) {
@@ -134,20 +137,21 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
 
     // ─── Group estimation mutations ───────────────────────────────────────────
 
-    public Map<String, Object> createGroupEstimation(String groupId, String title) {
-        return post("/group-estimations", Map.of("groupId", groupId, "title", title), idOnlyHeaders());
+    public GroupEstimationItem createGroupEstimation(String groupId, String title) {
+        HttpEntity<Map<String, String>> req = new HttpEntity<>(
+            Map.of("groupId", groupId, "title", title), idOnlyHeaders());
+        return restTemplate.postForObject(BASE + "/group-estimations", req, GroupEstimationItem.class);
     }
 
-    public Map<String, Object> submitGroupEstimationVote(String groupEstimationId,
+    public GroupEstimationVote submitGroupEstimationVote(String groupEstimationId,
             int complexity, int reach, int dimensions, int risk, int interaction) {
         Map<String, Object> body = Map.of(
             "complexity", complexity, "reach", reach, "dimensions", dimensions,
             "risk", risk, "interaction", interaction);
         HttpEntity<Map<String, Object>> req = new HttpEntity<>(body, idOnlyHeaders());
-        return restTemplate.exchange(
+        return restTemplate.postForObject(
             BASE + "/group-estimations/" + groupEstimationId + "/vote",
-            HttpMethod.POST, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            req, GroupEstimationVote.class);
     }
 
     public Boolean restartGroupEstimation(String groupEstimationId) {
@@ -158,12 +162,11 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         return true;
     }
 
-    public Map<String, Object> renameGroupEstimation(String groupEstimationId, String title) {
+    public GroupEstimationItem renameGroupEstimation(String groupEstimationId, String title) {
         HttpEntity<Map<String, String>> req = new HttpEntity<>(Map.of("title", title), idOnlyHeaders());
         return restTemplate.exchange(
             BASE + "/group-estimations/" + groupEstimationId + "/title",
-            HttpMethod.PUT, req,
-            new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            HttpMethod.PUT, req, GroupEstimationItem.class).getBody();
     }
 
     public Boolean deleteGroupEstimation(String groupEstimationId) {
@@ -174,8 +177,9 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         return true;
     }
 
-    public Map<String, Object> acceptGroupInvite(String token) {
-        return post("/invitations/accept", Map.of("token", token), userHeaders());
+    public GroupDetail acceptGroupInvite(String token) {
+        HttpEntity<Map<String, String>> req = new HttpEntity<>(Map.of("token", token), userHeaders());
+        return restTemplate.postForObject(BASE + "/invitations/accept", req, GroupDetail.class);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -226,11 +230,5 @@ public class GroupResolver implements GraphQLQueryResolver, GraphQLMutationResol
         h.setContentType(MediaType.APPLICATION_JSON);
         h.set("X-User-Id", userId != null ? userId : "");
         return h;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> post(String path, Map<String, ?> body, HttpHeaders headers) {
-        HttpEntity<Map<String, ?>> req = new HttpEntity<>(body, headers);
-        return (Map<String, Object>) restTemplate.postForObject(BASE + path, req, Map.class);
     }
 }
