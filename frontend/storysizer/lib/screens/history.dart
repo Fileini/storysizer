@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:storysizer/models/group_estimation.dart';
 import 'package:storysizer/providers.dart';
 import 'package:storysizer/widgets/history-item.dart';
 
@@ -16,10 +17,14 @@ class _HistoryViewState extends ConsumerState<HistoryView> with RouteAware {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        ref.read(estimationsNotifierProvider.notifier).loadEstimations());
+    Future.microtask(() {
+      ref.read(estimationsNotifierProvider.notifier).loadEstimations();
+      ref.read(groupEstimationFeedNotifierProvider.notifier).loadFeed();
+      ref.read(pendingCountNotifierProvider.notifier).refresh();
+    });
   }
- @override
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
@@ -34,51 +39,132 @@ class _HistoryViewState extends ConsumerState<HistoryView> with RouteAware {
   @override
   void didPopNext() {
     ref.read(estimationsNotifierProvider.notifier).loadEstimations();
+    ref.read(groupEstimationFeedNotifierProvider.notifier).loadFeed();
+    ref.read(pendingCountNotifierProvider.notifier).refresh();
   }
 
+  void _navigateToEstimation(GroupEstimationItemModel item) {
+    if (item.isPending) {
+      context.go('/groups/${item.groupId}/estimation/${item.id}/vote');
+    } else {
+      context.go('/groups/${item.groupId}/estimation/${item.id}/dashboard');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(estimationsNotifierProvider);
+    final estimState = ref.watch(estimationsNotifierProvider);
+    final feedState = ref.watch(groupEstimationFeedNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("History"),
+        title: const Text("Estimations"),
       ),
-      body: state.isLoading
+      body: (estimState.isLoading && feedState.isLoading)
           ? const Center(child: CircularProgressIndicator())
-          : state.error != null
-              ? Center(child: Text("Errore: ${state.error}"))
-              : state.estimations == null || state.estimations!.isEmpty
-                  ? const Center(child: Text("History is Empty."))
-                  : ListView.builder(
-                      itemCount: state.estimations!.length,
-                      itemBuilder: (context, index) {
-                        final estimation = state.estimations![index];
-                        return HistoryItem(
+          : RefreshIndicator(
+              onRefresh: () async {
+                ref.read(estimationsNotifierProvider.notifier).loadEstimations();
+                ref.read(groupEstimationFeedNotifierProvider.notifier).loadFeed();
+                ref.read(pendingCountNotifierProvider.notifier).refresh();
+              },
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  // ── Group estimations section ──────────────────────────────
+                  if (feedState.items?.isNotEmpty == true) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text('Group Estimations',
+                          style: Theme.of(context).textTheme.titleSmall),
+                    ),
+                    ...feedState.items!.map((item) => _GroupEstimationFeedItem(
+                          item: item,
+                          onTap: () => _navigateToEstimation(item),
+                        )),
+                    const Divider(height: 24),
+                  ],
+
+                  // ── Quick estimations section ──────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text('Quick Estimations',
+                        style: Theme.of(context).textTheme.titleSmall),
+                  ),
+                  if (estimState.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (estimState.error != null)
+                    Center(child: Text("Error: ${estimState.error}"))
+                  else if (estimState.estimations == null || estimState.estimations!.isEmpty)
+                    const Center(child: Text("No quick estimations yet."))
+                  else
+                    ...estimState.estimations!.map((estimation) => HistoryItem(
                           id: estimation.story.id,
                           title: estimation.story.name,
-                          // Ignoriamo il campo description
                           description: '',
-                          // Per esempio, possiamo mostrare l'owner come "points"
                           points: estimation.size.toString(),
                           icon: CupertinoIcons.delete_solid,
                           onDeleted: () async {
                             await ref
                                 .read(storiesNotifierProvider.notifier)
                                 .deleteStory(estimation.story.id);
-                           await ref.read(estimationsNotifierProvider.notifier).loadEstimations();
-
-
+                            await ref
+                                .read(estimationsNotifierProvider.notifier)
+                                .loadEstimations();
                           },
                           onTap: () {
-                          final String estimationid = estimation.id;  
-                          context.go('/home/estimation/$estimationid');
-
+                            context.go('/home/estimation/${estimation.id}');
                           },
-                        );
-                      },
-                    ),
+                        )),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+class _GroupEstimationFeedItem extends StatelessWidget {
+  final GroupEstimationItemModel item;
+  final VoidCallback onTap;
+
+  const _GroupEstimationFeedItem({required this.item, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPending = item.isPending;
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 10),
+        color: isPending
+            ? Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.4)
+            : null,
+        child: ListTile(
+          leading: CircleAvatar(
+            radius: 20,
+            backgroundColor:
+                isPending ? Colors.amber.shade600 : Colors.green.shade600,
+            child: Icon(
+              isPending ? CupertinoIcons.exclamationmark : CupertinoIcons.checkmark,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+          title: Text(item.title,
+              style: Theme.of(context).textTheme.titleMedium),
+          subtitle: item.groupName != null
+              ? Text(item.groupName!,
+                  style: Theme.of(context).textTheme.bodySmall)
+              : null,
+          trailing: isPending
+              ? Chip(
+                  label: const Text('Vote now'),
+                  backgroundColor: Colors.amber.shade100,
+                  labelStyle: const TextStyle(fontSize: 11),
+                )
+              : const Icon(CupertinoIcons.chart_bar_fill, size: 18),
+        ),
+      ),
     );
   }
 }

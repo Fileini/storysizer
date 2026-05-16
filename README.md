@@ -8,7 +8,7 @@ StorySizer è una web app per la gestione e stima delle storie utente (story poi
 |-------|-----------|
 | Frontend | Flutter Web → Nginx alpine |
 | API Gateway | Spring Boot 3.4 + GraphQL + OAuth2/JWT |
-| Backend | Spring Boot 3.4, Java 17 (story-service, estimation-service) |
+| Backend | Spring Boot 3.4, Java 17 (story-service, estimation-service, group-service) |
 | Database | PostgreSQL 15 |
 | Auth | Keycloak 26.3 (Bitnami Helm) |
 | Cluster | k3s single-node bare metal (`fraserver`) |
@@ -24,7 +24,8 @@ StorySizer è una web app per la gestione e stima delle storie utente (story poi
 ├── frontend/storysizer/     # App Flutter Web
 ├── backend/
 │   ├── story-service/       # Microservizio gestione storie (Spring Boot)
-│   └── estimation-service/  # Microservizio stime (Spring Boot)
+│   ├── estimation-service/  # Microservizio stime (Spring Boot)
+│   └── group-service/       # Microservizio gruppi + stime collaborative + inviti email
 ├── graphql-gateway/         # API Gateway GraphQL (Spring Boot)
 ├── infrastructure/          # Manifesti Kubernetes e Helm values
 ├── devops/                  # Pipeline Jenkins e ambienti di sviluppo

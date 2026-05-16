@@ -1,0 +1,61 @@
+# Prerequisiti:
+#   1. groups-db-secret deve essere presente in service-prod
+#   2. microservices-postgres-secret deve essere presente in service-prod
+#      (si trova nel namespace 'database' — copiarlo con:
+#       kubectl get secret microservices-postgres-secret -n database -o json \
+#         | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp,.metadata.annotations) | .metadata.namespace="service-prod"' \
+#         | kubectl apply -f -)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-group-db
+  namespace: service-prod
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-db
+          image: postgres:15
+          command:
+            - sh
+            - -c
+            - |
+              CONN="host=postgres.database.svc.cluster.local port=5432 user=${PG_ADMIN_USER} dbname=postgres"
+
+              # Create user if not exists (idempotent)
+              psql "$CONN" -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NEW_USER}'" | grep -q 1 || \
+                psql "$CONN" -c "CREATE USER \"${NEW_USER}\" WITH PASSWORD '${NEW_PASSWORD}'"
+
+              # Create database if not exists (idempotent)
+              psql "$CONN" -tAc "SELECT 1 FROM pg_database WHERE datname='${NEW_DB}'" | grep -q 1 || \
+                psql "$CONN" -c "CREATE DATABASE \"${NEW_DB}\" OWNER \"${NEW_USER}\""
+
+              echo "Done: database '${NEW_DB}' and user '${NEW_USER}' are ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microservices-postgres-secret
+                  key: password
+            - name: PG_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microservices-postgres-secret
+                  key: username
+            - name: NEW_DB
+              valueFrom:
+                secretKeyRef:
+                  name: groups-db-secret
+                  key: POSTGRES_DB
+            - name: NEW_USER
+              valueFrom:
+                secretKeyRef:
+                  name: groups-db-secret
+                  key: POSTGRES_USER
+            - name: NEW_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: groups-db-secret
+                  key: POSTGRES_PASSWORD

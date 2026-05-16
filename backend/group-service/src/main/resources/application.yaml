@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: group
+
+  datasource:
+    url: jdbc:postgresql://postgres.database.svc.cluster.local:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+storysizer:
+  mail:
+    from: ${RESEND_FROM_EMAIL:StorySizer <noreply@storysizer.org>}
+    resend-api-key: ${RESEND_API_KEY}
+  app:
+    base-url: ${APP_BASE_URL:https://app.storysizer.org}

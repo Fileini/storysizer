@@ -4,6 +4,15 @@ type Query {
   stories: [Story]
   estimations: [Estimation]
   exportMyData: UserData
+
+  # Group queries
+  myGroups: [GroupDetail!]!
+  group(id: ID!): GroupDetail
+  groupEstimations(groupId: ID!): [GroupEstimationItem!]!
+  myPendingGroupEstimationsCount: Int!
+  groupEstimationFeed: [GroupEstimationItem!]!
+  myVote(groupEstimationId: ID!): GroupEstimationVote
+  groupEstimationDashboard(groupEstimationId: ID!): GroupEstimationDashboard
 }
 
 type Mutation {
@@ -20,6 +29,28 @@ type Mutation {
   deleteStory(id: ID!): Boolean
   deleteEstimation(id: ID!): Boolean
   deleteMyAccount: Boolean
+
+  # Group mutations
+  createGroup(name: String!): GroupDetail
+  renameGroup(groupId: ID!, name: String!): GroupDetail
+  deleteGroup(groupId: ID!): Boolean
+  inviteToGroup(groupId: ID!, email: String!): GroupInvitation
+  cancelGroupInvite(groupId: ID!, invitationId: ID!): Boolean
+  promoteGroupMember(groupId: ID!, targetUserId: String!): GroupMember
+  removeGroupMember(groupId: ID!, targetUserId: String!): Boolean
+  createGroupEstimation(groupId: ID!, title: String!): GroupEstimationItem
+  submitGroupEstimationVote(
+    groupEstimationId: ID!,
+    complexity: Int!,
+    reach: Int!,
+    dimensions: Int!,
+    risk: Int!,
+    interaction: Int!
+  ): GroupEstimationVote
+  restartGroupEstimation(groupEstimationId: ID!): Boolean
+  renameGroupEstimation(groupEstimationId: ID!, title: String!): GroupEstimationItem
+  deleteGroupEstimation(groupEstimationId: ID!): Boolean
+  acceptGroupInvite(token: String!): GroupDetail
 }
 
 type Story @key(fields: "id") {
@@ -41,4 +72,72 @@ type Estimation @key(fields: "id") {
 type UserData {
   stories: [Story]!
   estimations: [Estimation]!
+}
+
+# ─── Group types ──────────────────────────────────────────────────────────────
+
+type GroupDetail {
+  id: ID!
+  name: String!
+  createdByUserId: String!
+  myRole: String
+  members: [GroupMember!]!
+  pendingInvitations: [GroupInvitation!]!
+}
+
+type GroupMember {
+  userId: String!
+  displayName: String!
+  email: String!
+  role: String!
+  joinedAt: String
+}
+
+type GroupInvitation {
+  id: ID!
+  invitedEmail: String!
+  status: String!
+  createdAt: String
+}
+
+type GroupEstimationItem {
+  id: ID!
+  groupId: ID!
+  groupName: String
+  title: String!
+  myVoteStatus: String
+  createdAt: String
+}
+
+type GroupEstimationVote {
+  id: ID!
+  groupEstimationId: ID!
+  userId: String!
+  displayName: String
+  status: String!
+  complexity: Int
+  reach: Int
+  dimensions: Int
+  risk: Int
+  interaction: Int
+  sizer: Int
+  submittedAt: String
+}
+
+type GroupEstimationDashboard {
+  groupEstimationId: ID!
+  title: String!
+  groupName: String!
+  totalVoters: Int!
+  submittedVoters: Int!
+  complexityAvg: Float!
+  reachAvg: Float!
+  dimensionsAvg: Float!
+  riskAvg: Float!
+  interactionAvg: Float!
+  complexityAgreement: Float!
+  reachAgreement: Float!
+  dimensionsAgreement: Float!
+  riskAgreement: Float!
+  interactionAgreement: Float!
 }

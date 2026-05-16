@@ -191,14 +191,27 @@ $KUBECTL apply $DRY_RUN -f "$INFRA_DIR/jenkins/rbac/"
 echo ""
 
 # ============================================
-# Phase 8: Backend Services (story, estimation)
+# Phase 8: Backend Services (story, estimation, group)
 # ============================================
 echo "Phase 8: Backend Services..."
 $KUBECTL apply $DRY_RUN -f "$INFRA_DIR/backend/story-service/prod-story-service-manifest.yaml"
 $KUBECTL apply $DRY_RUN -f "$INFRA_DIR/backend/estimation-service/prod-estimation-service-manifest.yaml"
+
+# group-service: copia microservices-postgres-secret in service-prod (necessario per il Job)
+if [ -z "$DRY_RUN" ]; then
+  $KUBECTL get secret microservices-postgres-secret -n database -o json \
+    | jq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp,.metadata.annotations) | .metadata.namespace="service-prod"' \
+    | $KUBECTL apply -f -
+  # Crea DB e utente PostgreSQL per group-service (idempotente)
+  $KUBECTL apply -f "$INFRA_DIR/backend/group-service/create-group-db-job.yaml"
+  $KUBECTL wait --for=condition=complete job/create-group-db -n service-prod --timeout=120s || true
+fi
+
+$KUBECTL apply $DRY_RUN -f "$INFRA_DIR/backend/group-service/prod-group-service-manifest.yaml"
 # Init containers will wait for PostgreSQL
 wait_for_deployment "service-prod" "story-service" 300
 wait_for_deployment "service-prod" "estimation-service" 300
+wait_for_deployment "service-prod" "group-service" 300
 echo ""
 
 # ============================================

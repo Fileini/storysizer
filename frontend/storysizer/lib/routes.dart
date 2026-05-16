@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:storysizer/screens/group_detail.dart';
+import 'package:storysizer/screens/group_estimation_dashboard.dart';
+import 'package:storysizer/screens/group_estimation_vote.dart';
 import 'package:storysizer/screens/groups.dart';
 import 'package:storysizer/screens/login.dart';
 import 'package:storysizer/screens/menu.dart';
@@ -50,6 +53,54 @@ class StszRoutes {
               pageBuilder: (context, state) => _animatedPage(
                 state: state,
                 child: const MenuScreen(view: GroupsView()),
+              ),
+              routes: [
+                GoRoute(
+                  path: ':groupId',
+                  pageBuilder: (context, state) => _animatedPage(
+                    state: state,
+                    child: MenuScreen(
+                      view: GroupDetailView(
+                        groupId: state.pathParameters['groupId']!,
+                      ),
+                    ),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'estimation/:estimationId/vote',
+                      pageBuilder: (context, state) => _animatedPage(
+                        state: state,
+                        child: MenuScreen(
+                          view: GroupEstimationVoteView(
+                            groupId: state.pathParameters['groupId']!,
+                            estimationId: state.pathParameters['estimationId']!,
+                          ),
+                        ),
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'estimation/:estimationId/dashboard',
+                      pageBuilder: (context, state) => _animatedPage(
+                        state: state,
+                        child: MenuScreen(
+                          view: GroupEstimationDashboardView(
+                            groupId: state.pathParameters['groupId']!,
+                            estimationId: state.pathParameters['estimationId']!,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            GoRoute(
+              path: '/join-group',
+              pageBuilder: (context, state) => _animatedPage(
+                state: state,
+                child: JoinGroupScreen(
+                  token: state.uri.queryParameters['token'] ?? '',
+                ),
               ),
             ),
             GoRoute(

@@ -29,6 +29,7 @@ spec:
                         sh '''
                             kubectl rollout restart deployment story-service -n service-prod
                             kubectl rollout restart deployment estimation-service -n service-prod
+                            kubectl rollout restart deployment group-service -n service-prod
                         '''
                     }
                 }
