@@ -22,15 +22,27 @@ spec:
             - sh
             - -c
             - |
+              set -eu
+              # ON_ERROR_STOP: fa fallire psql al primo errore SQL invece di tornare 0
+              export PSQL_OPTS="-v ON_ERROR_STOP=1"
               CONN="host=postgres.database.svc.cluster.local port=5432 user=${PG_ADMIN_USER} dbname=postgres"
 
+              # Verifica connettivita' e auth prima di tutto
+              psql $PSQL_OPTS "$CONN" -c "SELECT 1" >/dev/null
+
               # Create user if not exists (idempotent)
-              psql "$CONN" -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NEW_USER}'" | grep -q 1 || \
-                psql "$CONN" -c "CREATE USER \"${NEW_USER}\" WITH PASSWORD '${NEW_PASSWORD}'"
+              if psql $PSQL_OPTS "$CONN" -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NEW_USER}'" | grep -q 1; then
+                echo "User '${NEW_USER}' already exists."
+              else
+                psql $PSQL_OPTS "$CONN" -c "CREATE USER \"${NEW_USER}\" WITH PASSWORD '${NEW_PASSWORD}'"
+              fi
 
               # Create database if not exists (idempotent)
-              psql "$CONN" -tAc "SELECT 1 FROM pg_database WHERE datname='${NEW_DB}'" | grep -q 1 || \
-                psql "$CONN" -c "CREATE DATABASE \"${NEW_DB}\" OWNER \"${NEW_USER}\""
+              if psql $PSQL_OPTS "$CONN" -tAc "SELECT 1 FROM pg_database WHERE datname='${NEW_DB}'" | grep -q 1; then
+                echo "Database '${NEW_DB}' already exists."
+              else
+                psql $PSQL_OPTS "$CONN" -c "CREATE DATABASE \"${NEW_DB}\" OWNER \"${NEW_USER}\""
+              fi
 
               echo "Done: database '${NEW_DB}' and user '${NEW_USER}' are ready."
           env:

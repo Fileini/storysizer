@@ -1,3 +1,6 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:storysizer/screens/group_detail.dart';
@@ -31,6 +34,29 @@ class StszRoutes {
             if (loc.startsWith('/coming-soon')) return null;
             final loggedIn = loginInfo.isLoggedIn;
             final isLoggingIn = loc == '/';
+
+            // Group invitation deep-link: preserve the token across the login
+            // round-trip so anonymous users can still accept the invite.
+            const pendingTokenKey = 'pending_invite_token';
+            if (loc == '/join-group') {
+              final token = state.uri.queryParameters['token'] ?? '';
+              if (!loggedIn) {
+                if (token.isNotEmpty) {
+                  html.window.localStorage[pendingTokenKey] = token;
+                }
+                return '/';
+              }
+              // Logged in: clear any stored token, we are about to consume it.
+              html.window.localStorage.remove(pendingTokenKey);
+            }
+            if (loggedIn && isLoggingIn) {
+              final pending = html.window.localStorage[pendingTokenKey];
+              if (pending != null && pending.isNotEmpty) {
+                html.window.localStorage.remove(pendingTokenKey);
+                return '/join-group?token=$pending';
+              }
+            }
+
             if (!loggedIn && !isLoggingIn) return '/';
             if (loggedIn && isLoggingIn) return '/home';
             return null;
