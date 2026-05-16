@@ -403,7 +403,7 @@ class DataRepository {
     const String query = r'''
       query GroupEstimations($groupId: ID!) {
         groupEstimations(groupId: $groupId) {
-          id groupId title myVoteStatus createdAt
+          id groupId title myVoteStatus amIAdmin createdAt
         }
       }
     ''';
@@ -421,7 +421,7 @@ class DataRepository {
     const String query = r'''
       query GroupEstimationFeed {
         groupEstimationFeed {
-          id groupId groupName title myVoteStatus createdAt
+          id groupId groupName title myVoteStatus amIAdmin createdAt
         }
       }
     ''';

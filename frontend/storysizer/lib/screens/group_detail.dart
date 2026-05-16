@@ -172,14 +172,14 @@ class _GroupDetailViewState extends ConsumerState<GroupDetailView> {
             ListTile(
               leading: const Icon(CupertinoIcons.chart_bar_fill),
               title: const Text('View Dashboard'),
-              onTap: () => Navigator.pop(ctx, 'dashboard'),
+              enabled: isAdmin,
+              onTap: isAdmin ? () => Navigator.pop(ctx, 'dashboard') : null,
             ),
-            if (item.isPending)
-              ListTile(
-                leading: const Icon(CupertinoIcons.pencil),
-                title: const Text('Vote'),
-                onTap: () => Navigator.pop(ctx, 'vote'),
-              ),
+            ListTile(
+              leading: const Icon(CupertinoIcons.pencil),
+              title: Text(item.isPending ? 'Vote' : 'View my vote'),
+              onTap: () => Navigator.pop(ctx, 'vote'),
+            ),
             if (isAdmin) ...[
               ListTile(
                 leading: const Icon(CupertinoIcons.refresh),
@@ -313,9 +313,9 @@ class _GroupDetailViewState extends ConsumerState<GroupDetailView> {
                 ...estimationsState.items!.map((item) => _EstimationTile(
                       item: item,
                       isAdmin: group.iAmAdmin,
-                      onTap: () => item.isPending
-                          ? context.go('/groups/${group.id}/estimation/${item.id}/vote')
-                          : context.go('/groups/${group.id}/estimation/${item.id}/dashboard'),
+                      onTap: () => (group.iAmAdmin && !item.isPending)
+                          ? context.go('/groups/${group.id}/estimation/${item.id}/dashboard')
+                          : context.go('/groups/${group.id}/estimation/${item.id}/vote'),
                       onLongPress: () =>
                           _estimationOptionsDialog(group.id, item, group.iAmAdmin),
                     )),

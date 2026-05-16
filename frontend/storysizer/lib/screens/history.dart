@@ -44,10 +44,12 @@ class _HistoryViewState extends ConsumerState<HistoryView> with RouteAware {
   }
 
   void _navigateToEstimation(GroupEstimationItemModel item) {
-    if (item.isPending) {
-      context.go('/groups/${item.groupId}/estimation/${item.id}/vote');
-    } else {
+    // Members always follow the vote flow (read-only when already submitted).
+    // Only admins of the group land on the dashboard, and only after they've voted.
+    if (item.amIAdmin && !item.isPending) {
       context.go('/groups/${item.groupId}/estimation/${item.id}/dashboard');
+    } else {
+      context.go('/groups/${item.groupId}/estimation/${item.id}/vote');
     }
   }
 

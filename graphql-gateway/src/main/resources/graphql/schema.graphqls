@@ -106,6 +106,7 @@ type GroupEstimationItem {
   groupName: String
   title: String!
   myVoteStatus: String
+  amIAdmin: Boolean
   createdAt: String
 }
 

@@ -4,6 +4,7 @@ class GroupEstimationItemModel {
   final String? groupName;
   final String title;
   final String? myVoteStatus; // TO_SIZE | SUBMITTED
+  final bool amIAdmin;
   final String? createdAt;
 
   const GroupEstimationItemModel({
@@ -12,6 +13,7 @@ class GroupEstimationItemModel {
     this.groupName,
     required this.title,
     this.myVoteStatus,
+    this.amIAdmin = false,
     this.createdAt,
   });
 
@@ -24,6 +26,7 @@ class GroupEstimationItemModel {
       groupName: json['groupName'] as String?,
       title: json['title'] as String,
       myVoteStatus: json['myVoteStatus'] as String?,
+      amIAdmin: json['amIAdmin'] as bool? ?? false,
       createdAt: json['createdAt'] as String?,
     );
   }

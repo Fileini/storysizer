@@ -1,6 +1,7 @@
 package com.fileini.storysizer.service.group.controller;
 
 import com.fileini.storysizer.service.group.dto.GroupEstimationDashboardDTO;
+import com.fileini.storysizer.service.group.dto.GroupEstimationItemDTO;
 import com.fileini.storysizer.service.group.model.GroupEstimation;
 import com.fileini.storysizer.service.group.model.GroupEstimationVote;
 import com.fileini.storysizer.service.group.service.GroupEstimationService;
@@ -21,13 +22,15 @@ public class GroupEstimationController {
 
     /** GET /group-estimations/group/{groupId} — all estimations for a group */
     @GetMapping("/group/{groupId}")
-    public List<GroupEstimation> getByGroup(@PathVariable Long groupId) {
-        return estimationService.getByGroup(groupId);
+    public List<GroupEstimationItemDTO> getByGroup(
+            @PathVariable Long groupId,
+            @RequestHeader("X-User-Id") String userId) {
+        return estimationService.getByGroup(groupId, userId);
     }
 
     /** GET /group-estimations/user/feed — feed (pending first, then submitted) */
     @GetMapping("/user/feed")
-    public List<GroupEstimation> getFeed(@RequestHeader("X-User-Id") String userId) {
+    public List<GroupEstimationItemDTO> getFeed(@RequestHeader("X-User-Id") String userId) {
         return estimationService.getFeedForUser(userId);
     }
 
@@ -55,7 +58,7 @@ public class GroupEstimationController {
 
     /** POST /group-estimations — create new group estimation */
     @PostMapping
-    public GroupEstimation create(
+    public GroupEstimationItemDTO create(
             @RequestBody Map<String, Object> body,
             @RequestHeader("X-User-Id") String userId) {
         Long groupId = Long.valueOf(body.get("groupId").toString());
@@ -67,7 +70,7 @@ public class GroupEstimationController {
 
     /** PUT /group-estimations/{id}/title — rename */
     @PutMapping("/{id}/title")
-    public GroupEstimation rename(
+    public GroupEstimationItemDTO rename(
             @PathVariable Long id,
             @RequestBody Map<String, String> body,
             @RequestHeader("X-User-Id") String userId) {

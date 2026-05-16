@@ -1,9 +1,11 @@
 package com.fileini.storysizer.service.group.service;
 
 import com.fileini.storysizer.service.group.dto.GroupEstimationDashboardDTO;
+import com.fileini.storysizer.service.group.dto.GroupEstimationItemDTO;
 import com.fileini.storysizer.service.group.model.GroupEstimation;
 import com.fileini.storysizer.service.group.model.GroupEstimationVote;
 import com.fileini.storysizer.service.group.model.GroupMember;
+import com.fileini.storysizer.service.group.model.SizingGroup;
 import com.fileini.storysizer.service.group.repository.GroupEstimationRepository;
 import com.fileini.storysizer.service.group.repository.GroupEstimationVoteRepository;
 import com.fileini.storysizer.service.group.repository.GroupMemberRepository;
@@ -39,20 +41,19 @@ public class GroupEstimationService {
 
     // ─── Queries ─────────────────────────────────────────────────────────────
 
-    public List<GroupEstimation> getByGroup(Long groupId) {
-        return estimationRepo.findByGroupIdOrderByCreatedAtDesc(groupId);
-    }
-
-    /** All group estimations where the user has a pending (TO_SIZE) vote */
-    public List<GroupEstimation> getPendingForUser(String userId) {
-        return voteRepo.findByUserIdAndStatus(userId, "TO_SIZE").stream()
-            .map(v -> estimationRepo.findById(v.getGroupEstimationId()).orElse(null))
-            .filter(e -> e != null)
+    /** All estimations of a group, decorated with myVoteStatus for the requesting user. */
+    public List<GroupEstimationItemDTO> getByGroup(Long groupId, String requestingUserId) {
+        SizingGroup group = groupService.requireGroup(groupId);
+        boolean amIAdmin = isAdmin(groupId, requestingUserId);
+        List<GroupEstimation> estimations = estimationRepo.findByGroupIdOrderByCreatedAtDesc(groupId);
+        return estimations.stream()
+            .map(e -> GroupEstimationItemDTO.from(e, group.getName(),
+                voteStatusFor(e.getId(), requestingUserId), amIAdmin))
             .collect(Collectors.toList());
     }
 
     /** All group estimations the user has any vote on (pending + submitted), for the feed */
-    public List<GroupEstimation> getFeedForUser(String userId) {
+    public List<GroupEstimationItemDTO> getFeedForUser(String userId) {
         List<GroupEstimationVote> pending = voteRepo.findByUserIdAndStatus(userId, "TO_SIZE");
         List<GroupEstimationVote> submitted = voteRepo.findByUserIdAndStatus(userId, "SUBMITTED");
 
@@ -62,9 +63,26 @@ public class GroupEstimationService {
             submitted.stream().sorted((a, b) -> b.getSubmittedAt() == null ? 0 :
                 a.getSubmittedAt() == null ? 1 : b.getSubmittedAt().compareTo(a.getSubmittedAt()))
         )
-        .map(v -> estimationRepo.findById(v.getGroupEstimationId()).orElse(null))
-        .filter(e -> e != null)
+        .map(v -> {
+            GroupEstimation e = estimationRepo.findById(v.getGroupEstimationId()).orElse(null);
+            if (e == null) return null;
+            String groupName = groupService.requireGroup(e.getGroupId()).getName();
+            return GroupEstimationItemDTO.from(e, groupName, v.getStatus(), isAdmin(e.getGroupId(), userId));
+        })
+        .filter(dto -> dto != null)
         .collect(Collectors.toList());
+    }
+
+    private String voteStatusFor(Long estimationId, String userId) {
+        return voteRepo.findByGroupEstimationIdAndUserId(estimationId, userId)
+            .map(GroupEstimationVote::getStatus)
+            .orElse(null);
+    }
+
+    private boolean isAdmin(Long groupId, String userId) {
+        return memberRepo.findByGroupIdAndUserId(groupId, userId)
+            .map(m -> "ADMIN".equalsIgnoreCase(m.getRole()))
+            .orElse(false);
     }
 
     public long countPendingForUser(String userId) {
@@ -84,9 +102,9 @@ public class GroupEstimationService {
      * active member of the group. Only an ADMIN can do this.
      */
     @Transactional
-    public GroupEstimation createGroupEstimation(Long groupId, String title, String requestingUserId) {
+    public GroupEstimationItemDTO createGroupEstimation(Long groupId, String title, String requestingUserId) {
         groupService.requireAdmin(groupId, requestingUserId);
-        groupService.requireGroup(groupId);
+        SizingGroup group = groupService.requireGroup(groupId);
 
         GroupEstimation estimation = estimationRepo.save(new GroupEstimation(groupId, title, requestingUserId));
 
@@ -95,7 +113,9 @@ public class GroupEstimationService {
             voteRepo.save(new GroupEstimationVote(estimation.getId(), m.getUserId(), m.getDisplayName()));
         }
 
-        return estimation;
+        // The creator is an admin/member: their own vote is TO_SIZE right after creation.
+        return GroupEstimationItemDTO.from(estimation, group.getName(),
+            voteStatusFor(estimation.getId(), requestingUserId), true);
     }
 
     // ─── Vote ────────────────────────────────────────────────────────────────
@@ -122,12 +142,15 @@ public class GroupEstimationService {
     // ─── Admin operations ────────────────────────────────────────────────────
 
     @Transactional
-    public GroupEstimation rename(Long groupEstimationId, String newTitle, String requestingUserId) {
+    public GroupEstimationItemDTO rename(Long groupEstimationId, String newTitle, String requestingUserId) {
         GroupEstimation estimation = requireEstimation(groupEstimationId);
         groupService.requireAdmin(estimation.getGroupId(), requestingUserId);
         estimation.setTitle(newTitle);
         estimation.setUpdatedAt(Instant.now());
-        return estimationRepo.save(estimation);
+        GroupEstimation saved = estimationRepo.save(estimation);
+        String groupName = groupService.requireGroup(saved.getGroupId()).getName();
+        return GroupEstimationItemDTO.from(saved, groupName,
+            voteStatusFor(saved.getId(), requestingUserId), true);
     }
 
     /**
@@ -166,9 +189,8 @@ public class GroupEstimationService {
 
     public GroupEstimationDashboardDTO getDashboard(Long groupEstimationId, String requestingUserId) {
         GroupEstimation estimation = requireEstimation(groupEstimationId);
-        // Any member can see the dashboard
-        memberRepo.findByGroupIdAndUserId(estimation.getGroupId(), requestingUserId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a member"));
+        // Dashboard is admin-only.
+        groupService.requireAdmin(estimation.getGroupId(), requestingUserId);
 
         List<GroupEstimationVote> allVotes = voteRepo.findByGroupEstimationId(groupEstimationId);
         List<GroupEstimationVote> submitted = allVotes.stream()
