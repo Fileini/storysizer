@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:storysizer/providers.dart';
+import 'package:storysizer/services/auth_service.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 class GroupsView extends ConsumerStatefulWidget {
   const GroupsView({super.key});
@@ -147,12 +150,47 @@ class JoinGroupScreen extends ConsumerStatefulWidget {
 }
 
 class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
+  static const String _pendingTokenKey = 'pending_invite_token';
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.token.isNotEmpty) {
-      Future.microtask(_acceptInvite);
+    final loginInfo = AuthService.instance.loginInfo;
+    loginInfo.addListener(_maybeStart);
+    _maybeStart();
+  }
+
+  @override
+  void dispose() {
+    AuthService.instance.loginInfo.removeListener(_maybeStart);
+    super.dispose();
+  }
+
+  void _maybeStart() {
+    if (_started || !mounted) return;
+    final loginInfo = AuthService.instance.loginInfo;
+    if (!loginInfo.isInitialized) return; // wait for Keycloak check-sso
+
+    if (widget.token.isEmpty) {
+      _started = true;
+      context.go(loginInfo.isLoggedIn ? '/groups' : '/');
+      return;
     }
+
+    if (!loginInfo.isLoggedIn) {
+      // Anonymous: stash the token so we can resume after login, then bounce
+      // to the login screen WITHOUT triggering any API call (which would
+      // otherwise force an immediate keycloak.login() with no IdP hint and
+      // land the user on Keycloak's credentials page).
+      _started = true;
+      html.window.localStorage[_pendingTokenKey] = widget.token;
+      context.go('/');
+      return;
+    }
+
+    _started = true;
+    Future.microtask(_acceptInvite);
   }
 
   Future<void> _acceptInvite() async {
