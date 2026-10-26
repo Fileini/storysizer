@@ -10,6 +10,7 @@ dist/
 /frontend/build/
 /frontend/flutter
 /backend/target/
+/backend/*/target/
 
 # Escludi file temporanei di design
 /design/*.tmp
